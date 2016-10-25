@@ -66,7 +66,7 @@ func main() {
 
 // Load the fallback servers list file. Failure to do so will result in
 // exiting the program.
-func loadFallbacks(filename string) (fallbacks []client.ChainedServerInfo) {
+func loadFallbacks(filename string) (fallbacks [][]client.ChainedServerInfo) {
 	if filename == "" {
 		log.Error("Please specify a fallbacks file")
 		flag.Usage()
@@ -84,8 +84,10 @@ func loadFallbacks(filename string) (fallbacks []client.ChainedServerInfo) {
 	}
 
 	// Replace newlines in cert with newline literals
-	for _, fb := range fallbacks {
-		fb.Cert = strings.Replace(fb.Cert, "\n", "\\n", -1)
+	for _, fbs := range fallbacks {
+		for _, fb := range fbs {
+			fb.Cert = strings.Replace(fb.Cert, "\n", "\\n", -1)
+		}
 	}
 	return
 }
@@ -96,7 +98,7 @@ type fullOutput struct {
 }
 
 // Test all fallback servers
-func testAllFallbacks(fallbacks []client.ChainedServerInfo) (output *chan fullOutput) {
+func testAllFallbacks(fallbacks [][]client.ChainedServerInfo) (output *chan fullOutput) {
 	outputChan := make(chan fullOutput)
 	output = &outputChan
 
@@ -104,8 +106,10 @@ func testAllFallbacks(fallbacks []client.ChainedServerInfo) (output *chan fullOu
 	fbChan := make(chan client.ChainedServerInfo)
 	// Channel fallback servers on-demand
 	go func() {
-		for _, val := range fallbacks {
-			fbChan <- val
+		for _, vals := range fallbacks {
+			for _, val := range vals {
+				fbChan <- val
+			}
 		}
 		close(fbChan)
 	}()
