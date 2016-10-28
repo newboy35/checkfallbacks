@@ -108,6 +108,10 @@ func testAllFallbacks(fallbacks [][]client.ChainedServerInfo) (output *chan full
 	go func() {
 		for _, vals := range fallbacks {
 			for _, val := range vals {
+				if val.PluggableTransport == "obfs4" {
+					// ignore legacy obfs4 protocol
+					continue
+				}
 				fbChan <- val
 			}
 		}
