@@ -1,0 +1,6 @@
+package: github.com/getlantern/checkfallbacks
+import:
+- package: github.com/getlantern/flashlight
+  subpackages:
+  - client
+- package: github.com/getlantern/golog
