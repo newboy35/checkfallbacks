@@ -36,14 +36,6 @@ var (
 	fallbacksFile = flag.String("fallbacks", "fallbacks.json", "File containing json array of fallback information")
 	numConns      = flag.Int("connections", 1, "Number of simultaneous connections")
 	verify        = flag.Bool("verify", false, "Verify the functionality of the fallback")
-
-	expectedBody = `
-User-agent: *
-Disallow:
-
-Sitemap: sitemap.xml
-
-`
 )
 
 var (
