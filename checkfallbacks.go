@@ -5,7 +5,6 @@
 package main
 
 import (
-	"encoding/base64"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -21,7 +20,14 @@ import (
 	"github.com/getlantern/flashlight/client"
 	"github.com/getlantern/flashlight/common"
 	"github.com/getlantern/golog"
-	"github.com/getlantern/uuid"
+)
+
+const (
+	// This is a special device ID that prevents checkfallbacks from being
+	// throttled. Regular device IDs are Base64 encoded. Since Base64 encoding
+	// doesn't use tildes, no regular device ID will ever match this special
+	// string.
+	DeviceID = "~~~~~~"
 )
 
 var (
@@ -42,8 +48,6 @@ Sitemap: sitemap.xml
 
 var (
 	log = golog.LoggerFor("checkfallbacks")
-
-	deviceID = base64.StdEncoding.EncodeToString(uuid.NodeID())
 )
 
 func main() {
@@ -155,7 +159,7 @@ func testAllFallbacks(fallbacks [][]chained.ChainedServerInfo) (output *chan ful
 
 // Perform the test of an individual server
 func testFallbackServer(name string, fb *chained.ChainedServerInfo, workerID int) (output fullOutput) {
-	dialer, err := client.ChainedDialer(name, fb, deviceID, func() string {
+	dialer, err := client.ChainedDialer(name, fb, DeviceID, func() string {
 		return "" // pro-token
 	})
 	if err != nil {
