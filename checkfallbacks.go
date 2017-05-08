@@ -5,6 +5,7 @@
 package main
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -16,12 +17,11 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/getlantern/flashlight/chained"
 	"github.com/getlantern/flashlight/client"
+	"github.com/getlantern/flashlight/common"
 	"github.com/getlantern/golog"
-)
-
-const (
-	DeviceID = "999999"
+	"github.com/getlantern/uuid"
 )
 
 var (
@@ -31,11 +31,19 @@ var (
 	numConns      = flag.Int("connections", 1, "Number of simultaneous connections")
 	verify        = flag.Bool("verify", false, "Verify the functionality of the fallback")
 
-	expectedBody = "Google is built by a large team of engineers, designers, researchers, robots, and others in many different sites across the globe. It is updated continuously, and built with more tools and technologies than we can shake a stick at. If you'd like to help us out, see google.com/careers.\n"
+	expectedBody = `
+User-agent: *
+Disallow:
+
+Sitemap: sitemap.xml
+
+`
 )
 
 var (
 	log = golog.LoggerFor("checkfallbacks")
+
+	deviceID = base64.StdEncoding.EncodeToString(uuid.NodeID())
 )
 
 func main() {
@@ -66,7 +74,7 @@ func main() {
 
 // Load the fallback servers list file. Failure to do so will result in
 // exiting the program.
-func loadFallbacks(filename string) (fallbacks [][]client.ChainedServerInfo) {
+func loadFallbacks(filename string) (fallbacks [][]chained.ChainedServerInfo) {
 	if filename == "" {
 		log.Error("Please specify a fallbacks file")
 		flag.Usage()
@@ -98,12 +106,12 @@ type fullOutput struct {
 }
 
 // Test all fallback servers
-func testAllFallbacks(fallbacks [][]client.ChainedServerInfo) (output *chan fullOutput) {
+func testAllFallbacks(fallbacks [][]chained.ChainedServerInfo) (output *chan fullOutput) {
 	outputChan := make(chan fullOutput)
 	output = &outputChan
 
 	// Make
-	fbChan := make(chan client.ChainedServerInfo)
+	fbChan := make(chan chained.ChainedServerInfo)
 	// Channel fallback servers on-demand
 	go func() {
 		for _, vals := range fallbacks {
@@ -129,8 +137,10 @@ func testAllFallbacks(fallbacks [][]client.ChainedServerInfo) (output *chan full
 			// Worker: consume fallback servers from channel and signal
 			// Done() when closed (i.e. range exits)
 			go func(i int) {
+				j := 0
 				for fb := range fbChan {
-					*output <- testFallbackServer(&fb, i)
+					*output <- testFallbackServer(fmt.Sprintf("%d-%d", i, j), &fb, i)
+					j++
 				}
 				workersWg.Done()
 			}(i + 1)
@@ -144,31 +154,35 @@ func testAllFallbacks(fallbacks [][]client.ChainedServerInfo) (output *chan full
 }
 
 // Perform the test of an individual server
-func testFallbackServer(fb *client.ChainedServerInfo, workerID int) (output fullOutput) {
-	dialer, err := client.ChainedDialer(fb, DeviceID, func() string { return "" })
+func testFallbackServer(name string, fb *chained.ChainedServerInfo, workerID int) (output fullOutput) {
+	dialer, err := client.ChainedDialer(name, fb, deviceID, func() string {
+		return "" // pro-token
+	})
 	if err != nil {
 		output.err = fmt.Errorf("%v: error building dialer: %v", fb.Addr, err)
 		return
 	}
 	c := &http.Client{
 		Transport: &http.Transport{
-			Dial: dialer.DialFN,
+			Dial: dialer.Dial,
 		},
 	}
-	req, err := http.NewRequest("GET", "http://www.google.com/humans.txt", nil)
+	req, err := http.NewRequest("GET", "http://ping-chained-server", nil)
 	if err != nil {
-		output.err = fmt.Errorf("%v: NewRequest to humans.txt failed: %v", fb.Addr, err)
+		output.err = fmt.Errorf("%v: NewRequest to ping failed: %v", fb.Addr, err)
 		return
 	}
+	req.Header.Set(common.PingHeader, "1") // request 1 KB
+
 	if *verbose {
 		reqStr, _ := httputil.DumpRequestOut(req, true)
 		output.info = []string{"\n" + string(reqStr)}
 	}
 
-	req.Header.Set("X-LANTERN-AUTH-TOKEN", fb.AuthToken)
+	req.Header.Set(common.TokenHeader, fb.AuthToken)
 	resp, err := c.Do(req)
 	if err != nil {
-		output.err = fmt.Errorf("%v: requesting humans.txt failed: %v", fb.Addr, err)
+		output.err = fmt.Errorf("%v: ping failed: %v", fb.Addr, err)
 		return
 	}
 	if *verbose {
@@ -176,8 +190,8 @@ func testFallbackServer(fb *client.ChainedServerInfo, workerID int) (output full
 		output.info = append(output.info, "\n"+string(respStr))
 	}
 	defer func() {
-		if err := resp.Body.Close(); err != nil {
-			log.Debugf("Unable to close response body: %v", err)
+		if closeErr := resp.Body.Close(); closeErr != nil {
+			log.Debugf("Unable to close response body: %v", closeErr)
 		}
 	}()
 	if resp.StatusCode != 200 {
@@ -189,9 +203,8 @@ func testFallbackServer(fb *client.ChainedServerInfo, workerID int) (output full
 		output.err = fmt.Errorf("%v: error reading response body: %v", fb.Addr, err)
 		return
 	}
-	body := string(bytes)
-	if body != expectedBody {
-		output.err = fmt.Errorf("%v: wrong body: %s", fb.Addr, body)
+	if len(bytes) != 1024 {
+		output.err = fmt.Errorf("%v: wrong body size: %d", fb.Addr, len(bytes))
 		return
 	}
 
