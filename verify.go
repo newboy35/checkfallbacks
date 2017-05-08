@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"net/http/httputil"
 
-	"github.com/getlantern/flashlight/client"
+	"github.com/getlantern/flashlight/chained"
 )
 
 var (
@@ -39,7 +39,7 @@ Check the location and try again.
 `)
 )
 
-func verifyFallback(fb *client.ChainedServerInfo, c *http.Client) {
+func verifyFallback(fb *chained.ChainedServerInfo, c *http.Client) {
 	verifyMimicWhenNoAuthToken(fb, c)
 	verifyMimicWithInvalidAuthToken(fb, c)
 	for _, s := range redirectSites {
@@ -47,7 +47,7 @@ func verifyFallback(fb *client.ChainedServerInfo, c *http.Client) {
 	}
 }
 
-func verifyMimicWhenNoAuthToken(fb *client.ChainedServerInfo, c *http.Client) {
+func verifyMimicWhenNoAuthToken(fb *chained.ChainedServerInfo, c *http.Client) {
 	req, err := http.NewRequest("GET", "http://www.google.com/humans.txt", nil)
 	if err != nil {
 		log.Errorf("%v: NewRequest() error : %v", fb.Addr, err)
@@ -57,7 +57,7 @@ func verifyMimicWhenNoAuthToken(fb *client.ChainedServerInfo, c *http.Client) {
 	doVerifyMimic(fb.Addr, req, c)
 }
 
-func verifyMimicWithInvalidAuthToken(fb *client.ChainedServerInfo, c *http.Client) {
+func verifyMimicWithInvalidAuthToken(fb *chained.ChainedServerInfo, c *http.Client) {
 	req, err := http.NewRequest("GET", "http://www.google.com/humans.txt", nil)
 	if err != nil {
 		log.Errorf("%v: NewRequest() error : %v", fb.Addr, err)
@@ -112,7 +112,7 @@ func doVerifyMimic(addr string, req *http.Request, c *http.Client) {
 	log.Debugf("%v: OK.", addr)
 }
 
-func verifyRedirectSites(fb *client.ChainedServerInfo, c *http.Client, url string) {
+func verifyRedirectSites(fb *chained.ChainedServerInfo, c *http.Client, url string) {
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		log.Errorf("error make request to %s: %v", url, err)
