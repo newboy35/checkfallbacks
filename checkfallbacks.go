@@ -133,10 +133,8 @@ func testAllFallbacks(fallbacks [][]chained.ChainedServerInfo) (output *chan ful
 			// Worker: consume fallback servers from channel and signal
 			// Done() when closed (i.e. range exits)
 			go func(i int) {
-				j := 0
 				for fb := range fbChan {
-					*output <- testFallbackServer(fmt.Sprintf("%d-%d", i, j), &fb, i)
-					j++
+					*output <- testFallbackServer(&fb, i)
 				}
 				workersWg.Done()
 			}(i + 1)
@@ -150,7 +148,12 @@ func testAllFallbacks(fallbacks [][]chained.ChainedServerInfo) (output *chan ful
 }
 
 // Perform the test of an individual server
-func testFallbackServer(name string, fb *chained.ChainedServerInfo, workerID int) (output fullOutput) {
+func testFallbackServer(fb *chained.ChainedServerInfo, workerID int) (output fullOutput) {
+	pt := fb.PluggableTransport
+	if pt == "" {
+		pt = "https"
+	}
+	name := fmt.Sprintf("%v (%v)", fb.Addr, pt)
 	dialer, err := client.ChainedDialer(name, fb, DeviceID, func() string {
 		return "" // pro-token
 	})
