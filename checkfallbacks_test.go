@@ -1,24 +1,25 @@
 package main
 
 import (
-	"github.com/getlantern/flashlight/client"
 	"reflect"
 	"testing"
+
+	"github.com/getlantern/flashlight/chained"
 )
 
 func TestJSONloading(t *testing.T) {
 	fallbacks := loadFallbacks("test.json")
 
-	expectedFb := [][]client.ChainedServerInfo{
-		[]client.ChainedServerInfo{
-			client.ChainedServerInfo{
+	expectedFb := [][]chained.ChainedServerInfo{
+		[]chained.ChainedServerInfo{
+			chained.ChainedServerInfo{
 				Addr:      "78.62.239.134:443",
 				Cert:      "-----CERTIFICATE-----\n",
 				AuthToken: "a1",
 			},
 		},
-		[]client.ChainedServerInfo{
-			client.ChainedServerInfo{
+		[]chained.ChainedServerInfo{
+			chained.ChainedServerInfo{
 				Addr:      "178.62.239.34:80",
 				Cert:      "-----CERTIFICATE-----\n",
 				AuthToken: "a2",

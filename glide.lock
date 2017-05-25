@@ -1,5 +1,5 @@
 hash: f77b51e789cbd62d1627afa51f8b348dc1e74755dbfdf21d1ffd4cf4435af8e8
-updated: 2017-05-08T07:56:58.187507446-05:00
+updated: 2017-05-18T10:49:09.572322072-05:00
 imports:
 - name: git.torproject.org/pluggable-transports/goptlib.git
   version: a6aba3a6314be3a8ef518d5d4269a8459af9c789
@@ -34,7 +34,7 @@ imports:
 - name: github.com/getlantern/bandwidth
   version: 96de96fff16cf1aa844edc1b4a72c906add83180
 - name: github.com/getlantern/borda
-  version: 15cc49b4d459c28f0a79aa46abdcb48e0cf75d7b
+  version: b29253ebee1b978abb20d5897d650cc1a2e041d5
   subpackages:
   - client
 - name: github.com/getlantern/byteexec
@@ -46,7 +46,7 @@ imports:
 - name: github.com/getlantern/detour
   version: 36801cb3f46d22d4e07ef7a8c123bba1991a73a1
 - name: github.com/getlantern/easylist
-  version: 25b9c8260994c786daa2a385f3ec521a259e342f
+  version: 21cf8de29202241c29943e7a7b0b451f3a9e8f8d
 - name: github.com/getlantern/ema
   version: d906ee7c3465210c328abbe6ea0f855db9db679c
 - name: github.com/getlantern/errors
@@ -56,7 +56,7 @@ imports:
 - name: github.com/getlantern/filepersist
   version: c5f0cd24e7991579ba6f5f1bd20a1ad2c9f06cd4
 - name: github.com/getlantern/flashlight
-  version: ef7f5adf88e9351a78b3454a6956b45714dc1a08
+  version: 1d6c2240c1b7550d4efe413fb6413cabe6c64a64
   subpackages:
   - balancer
   - buffers
@@ -81,7 +81,7 @@ imports:
   - isp
   - redis
 - name: github.com/getlantern/golog
-  version: e69a4a00c012e476efd814128cdcd4e04e641dc7
+  version: cca714f7feb5df8e455f409b549d384441ac4578
 - name: github.com/getlantern/hex
   version: 083fba3033ad473db3dd31c9bb368473d37581a7
 - name: github.com/getlantern/hidden
@@ -118,14 +118,12 @@ imports:
   version: b4d0a731957c4658f2e281e1ae8653781719a55b
 - name: github.com/getlantern/urlcache
   version: cf9a7866aa8239f7cc71a098bed5e3bc08fbd5bb
-- name: github.com/getlantern/uuid
-  version: 1318e7614b82cd38041b0b0bd3692d71f3901fb8
 - name: github.com/getlantern/wal
   version: b17dbdbead93a94e64755a23855663cd8ff194d5
 - name: github.com/getlantern/withtimeout
   version: 511f017cd91361be75ad73fee96e466a5d790312
 - name: github.com/getlantern/zenodb
-  version: e4847466e49009e031ac71d575fbd96266bf3926
+  version: 9d9c586a54da44098c4f13d5d63e7854fc790917
   subpackages:
   - bytetree
   - common
@@ -136,7 +134,7 @@ imports:
   - rpc
   - sql
 - name: github.com/golang/protobuf
-  version: 18c9bb3261723cd5401db4d0c9fbc5c3b6c70fe8
+  version: fec3b39b059c0f88fa6b20f5ed012b1aa203a8b4
   subpackages:
   - proto
   - ptypes/any
@@ -166,7 +164,7 @@ imports:
 - name: github.com/Yawning/chacha20
   version: 2524561b8ee24c13b0aa1526d827571ab3061eac
 - name: golang.org/x/crypto
-  version: 5a033cc77e57eca05bdb50522851d29e03569cbe
+  version: 0fe963104e9d1877082f8fb38f816fcd97eb1d10
   subpackages:
   - chacha20poly1305
   - chacha20poly1305/internal/chacha20
@@ -176,7 +174,7 @@ imports:
   - poly1305
   - salsa20/salsa
 - name: golang.org/x/net
-  version: feeb485667d1fdabe727840fe00adc22431bc86e
+  version: 513929065c19401a1c7b76ecd942f9f86a0c061b
   repo: https://github.com/golang/net
   vcs: git
   subpackages:
@@ -188,14 +186,14 @@ imports:
   - lex/httplex
   - trace
 - name: golang.org/x/sys
-  version: 9ccfe848b9db8435a24c424abbc07a921adf1df5
+  version: e62c3de784db939836898e5c19ffd41bece347da
   repo: https://github.com/golang/sys
   vcs: git
   subpackages:
   - unix
   - windows
 - name: golang.org/x/text
-  version: 470f45bf29f4147d6fbd7dfd0a02a848e49f5bf4
+  version: 19e51611da83d6be54ddafce4a4af510cb3e9ea4
   subpackages:
   - secure/bidirule
   - transform
@@ -213,11 +211,11 @@ imports:
   - internal/modules
   - internal/remote_api
 - name: google.golang.org/genproto
-  version: 411e09b969b1170a9f0c467558eb4c4c110d9c77
+  version: bb3573be0c484136831138976d444b8754777aff
   subpackages:
   - googleapis/rpc/status
 - name: google.golang.org/grpc
-  version: ffa4ec7da24e8f4ee690d9aad2afad973e721d7b
+  version: 11d93ecdb918872ee841ba3a2dc391aa6d4f57c3
   subpackages:
   - codes
   - credentials
