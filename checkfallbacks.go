@@ -27,11 +27,7 @@ const (
 	// throttled. Regular device IDs are Base64 encoded. Since Base64 encoding
 	// doesn't use tildes, no regular device ID will ever match this special
 	// string.
-	// DeviceID = "~~~~~~"
-
-	// For now, sending an empty device ID until
-	// https://github.com/getlantern/http-proxy-lantern/pull/173 is deployed.
-	DeviceID = ""
+	DeviceID = "~~~~~~"
 )
 
 var (
