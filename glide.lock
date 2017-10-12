@@ -62,7 +62,7 @@ imports:
 - name: github.com/getlantern/filepersist
   version: c5f0cd24e7991579ba6f5f1bd20a1ad2c9f06cd4
 - name: github.com/getlantern/flashlight
-  version: 2098885398219efb7fb83331b1b8d7043e8f0c87
+  version: ae910953669c69094edf518ad6ae36cce05268d5
   subpackages:
   - balancer
   - buffers
