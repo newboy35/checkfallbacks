@@ -1,5 +1,5 @@
-hash: f77b51e789cbd62d1627afa51f8b348dc1e74755dbfdf21d1ffd4cf4435af8e8
-updated: 2017-10-12T13:51:40.316244268-07:00
+hash: c8162574ccf8f39d1de2307f3193d7876aeb6599b3eb4f43c02bef95749a2c6c
+updated: 2017-10-12T14:25:03.701915861-07:00
 imports:
 - name: git.torproject.org/pluggable-transports/goptlib.git
   version: a3ad5df6c9e7dc8117f55958b4ce99bf1e0fe291
@@ -34,7 +34,7 @@ imports:
 - name: github.com/getlantern/bandwidth
   version: 96de96fff16cf1aa844edc1b4a72c906add83180
 - name: github.com/getlantern/borda
-  version: b29253ebee1b978abb20d5897d650cc1a2e041d5
+  version: d41cb3687c2f2a192ea12e349ca87c4f6559fa37
   subpackages:
   - client
 - name: github.com/getlantern/byteexec
@@ -94,6 +94,10 @@ imports:
   version: 7a71d2e71cf253f64b9610ce7aa9ddfc58aa9b2a
 - name: github.com/getlantern/iptool
   version: 8723ea29ea42bdb85682c242b8e803aa6f05c9db
+- name: github.com/getlantern/kcptun
+  version: f8fd1940bcc36ef5e33799d9e8947e7864474c76
+  subpackages:
+  - client/lib
 - name: github.com/getlantern/keyman
   version: 9d65bff0c88a85449195d54c38322e254b2ac34b
   subpackages:
@@ -116,6 +120,11 @@ imports:
   - filters
 - name: github.com/getlantern/sqlparser
   version: a879d8035f3cd754fdda965da8305bb9d04ec439
+  subpackages:
+  - dependency/bson
+  - dependency/bytes2
+  - dependency/hack
+  - dependency/sqltypes
 - name: github.com/getlantern/stack
   version: 02f928aad224fbccd50d66edd776fc9d1e9f2f2b
 - name: github.com/getlantern/tlsdialer
@@ -127,7 +136,7 @@ imports:
 - name: github.com/getlantern/withtimeout
   version: 511f017cd91361be75ad73fee96e466a5d790312
 - name: github.com/getlantern/zenodb
-  version: 9d9c586a54da44098c4f13d5d63e7854fc790917
+  version: 0947e81d5d5dcf171c76987d56eb18a9cf835932
   subpackages:
   - bytetree
   - common
@@ -151,45 +160,71 @@ imports:
   version: 0a025b7e63adc15a622f29b0b2c4c3848243bbf6
   subpackages:
   - simplelru
+- name: github.com/mitchellh/mapstructure
+  version: d0303fe809921458f417bcf828397a65db30a7e4
 - name: github.com/oschwald/geoip2-golang
   version: 5b1dc16861f81d05d9836bb21c2d0d65282fc0b8
 - name: github.com/oschwald/maxminddb-golang
   version: 26fe5ace1c706491c2936119e1dc69c1a9c04d7f
 - name: github.com/oxtoacart/bpool
   version: 4e1c5567d7c2dd59fa4c7c83d34c2f3528b025d6
+- name: github.com/pkg/errors
+  version: 2b3a18b5f0fb6b4f9190549597d3f962c02bc5eb
 - name: github.com/pmezard/adblock
   version: 29c53dd9e3bcee4e9162f84047266994562d06a0
   subpackages:
   - adblock
+- name: github.com/templexxx/cpufeat
+  version: 3794dfbfb04749f896b521032f69383f24c3687e
+- name: github.com/templexxx/reedsolomon
+  version: 7092926d7d05c415fabb892b1464a03f8228ab80
+- name: github.com/templexxx/xor
+  version: 0af8e873c554da75f37f2049cdffda804533d44c
+- name: github.com/tjfoc/gmsm
+  version: e3a572cdfd02c1a047473bb29d896a76748e4049
+  subpackages:
+  - sm4
+- name: github.com/xtaci/kcp-go
+  version: aab6d6d0d9dc69efaf707bbf711475f66befeda4
+- name: github.com/xtaci/smux
+  version: ebec7ef2574b42a7088cd7751176483e0a27d458
 - name: github.com/xwb1989/sqlparser
   version: 3b9d32a5e86c7c2aef3d2f22b8dc3f1720e02c38
   subpackages:
-  - dependency/bytes2
   - dependency/hack
-  - dependency/querypb
-  - dependency/sqltypes
 - name: github.com/Yawning/chacha20
   version: e3b1f968fc6397b51d963fee8ec8711a47bc0ce8
 - name: golang.org/x/crypto
   version: 9419663f5a44be8b34ca85f08abc5fe1be11f8a3
   subpackages:
+  - blowfish
+  - cast5
   - chacha20poly1305
   - chacha20poly1305/internal/chacha20
   - curve25519
   - hkdf
   - nacl/secretbox
+  - pbkdf2
   - poly1305
+  - salsa20
   - salsa20/salsa
+  - tea
+  - twofish
+  - xtea
 - name: golang.org/x/net
   version: a04bdaca5b32abe1c069418fb7088ae607de5bd0
   repo: https://github.com/golang/net
   vcs: git
   subpackages:
+  - bpf
   - context
   - http2
   - http2/hpack
   - idna
+  - internal/iana
+  - internal/socket
   - internal/timeseries
+  - ipv4
   - lex/httplex
   - trace
 - name: golang.org/x/sys
@@ -222,7 +257,7 @@ imports:
   subpackages:
   - googleapis/rpc/status
 - name: google.golang.org/grpc
-  version: 11d93ecdb918872ee841ba3a2dc391aa6d4f57c3
+  version: 3c33c26290b747350f8650c7d38bcc51b42dc785
   subpackages:
   - codes
   - credentials
