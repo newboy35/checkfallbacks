@@ -149,11 +149,20 @@ func testAllFallbacks(fallbacks [][]chained.ChainedServerInfo) (output *chan ful
 
 // Perform the test of an individual server
 func testFallbackServer(fb *chained.ChainedServerInfo, workerID int) (output fullOutput) {
-	pt := fb.PluggableTransport
-	if pt == "" {
-		pt = "https"
+	proto := "http"
+	if fb.Cert != "" {
+		proto = "https"
 	}
-	name := fmt.Sprintf("%v (%v)", fb.Addr, pt)
+	switch fb.PluggableTransport {
+	case "obfs4":
+		proto = "obfs4"
+	case "lampshade":
+		proto = "lampshade"
+	}
+	if fb.KCPSettings != nil && len(fb.KCPSettings) > 0 {
+		proto = "kcp"
+	}
+	name := fmt.Sprintf("%v (%v)", fb.Addr, proto)
 	dialer, err := client.ChainedDialer(name, fb, DeviceID, func() string {
 		return "" // pro-token
 	})
