@@ -107,20 +107,17 @@ func testAllFallbacks(fallbacks [][]chained.ChainedServerInfo) (output *chan ful
 	output = &outputChan
 
 	// Make
-	fbChan := make(chan chained.ChainedServerInfo)
-	// Channel fallback servers on-demand
-	go func() {
-		for _, vals := range fallbacks {
-			for _, val := range vals {
-				if val.PluggableTransport == "obfs4" {
-					// ignore legacy obfs4 protocol
-					continue
-				}
-				fbChan <- val
-			}
+	numFallbacks := 0
+	for _, vals := range fallbacks {
+		numFallbacks += len(vals)
+	}
+	fbChan := make(chan chained.ChainedServerInfo, numFallbacks)
+	for _, vals := range fallbacks {
+		for _, val := range vals {
+			fbChan <- val
 		}
-		close(fbChan)
-	}()
+	}
+	close(fbChan)
 
 	// Spawn goroutines and wait for them to finish
 	go func() {
@@ -163,6 +160,7 @@ func testFallbackServer(fb *chained.ChainedServerInfo, workerID int) (output ful
 		proto = "kcp"
 	}
 	name := fmt.Sprintf("%v (%v)", fb.Addr, proto)
+	log.Debugf("Testing %v", name)
 	dialer, err := client.ChainedDialer(name, fb, DeviceID, func() string {
 		return "" // pro-token
 	})
