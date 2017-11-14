@@ -1,5 +1,5 @@
 hash: c8162574ccf8f39d1de2307f3193d7876aeb6599b3eb4f43c02bef95749a2c6c
-updated: 2017-10-12T14:25:03.701915861-07:00
+updated: 2017-11-13T13:47:10.134211-06:00
 imports:
 - name: git.torproject.org/pluggable-transports/goptlib.git
   version: a3ad5df6c9e7dc8117f55958b4ce99bf1e0fe291
@@ -103,7 +103,7 @@ imports:
   subpackages:
   - certimporter
 - name: github.com/getlantern/lampshade
-  version: c7d71c3e99a56e2a883c8cb7d67df2bffab833a5
+  version: 34dfbfff61dc72162efefa87712e73f8920336b5
 - name: github.com/getlantern/measured
   version: 0582bf799783fba9a890459155817f1cbcf00f17
 - name: github.com/getlantern/mtime
@@ -150,10 +150,7 @@ imports:
   version: 130e6b02ab059e7b717a096f397c5b60111cae74
   subpackages:
   - proto
-  - ptypes
   - ptypes/any
-  - ptypes/duration
-  - ptypes/timestamp
 - name: github.com/golang/snappy
   version: 553a641470496b2327abcac10b36396bd98e45c9
 - name: github.com/hashicorp/golang-lru
