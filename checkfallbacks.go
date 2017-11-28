@@ -179,6 +179,7 @@ func testFallbackServer(fb *chained.ChainedServerInfo, workerID int) (output ful
 		return
 	}
 	req.Header.Set(common.PingHeader, "1") // request 1 KB
+	req.Header.Set(common.DeviceIdHeader, DeviceID)
 
 	if *verbose {
 		reqStr, _ := httputil.DumpRequestOut(req, true)
