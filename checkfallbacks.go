@@ -35,7 +35,7 @@ var (
 	verbose       = flag.Bool("verbose", false, "Be verbose (useful for manual testing)")
 	fallbacksFile = flag.String("fallbacks", "fallbacks.json", "File containing json array of fallback information")
 	numConns      = flag.Int("connections", 1, "Number of simultaneous connections")
-	verifyGeo     = flag.Bool("verify", false, "Set to true to verify upstream connectivity to geo.getiantem.org")
+	verify        = flag.Bool("verify", false, "Set to true to verify upstream connectivity")
 )
 
 var (
@@ -178,8 +178,8 @@ func testFallbackServer(fb *chained.ChainedServerInfo, workerID int) (output *fu
 		},
 	}
 
-	if *verifyGeo {
-		geo(fb, c, workerID, output)
+	if *verify {
+		verifyUpstream(fb, c, workerID, output)
 	} else {
 		ping(fb, c, workerID, output)
 	}
@@ -205,23 +205,22 @@ func ping(fb *chained.ChainedServerInfo, c *http.Client, workerID int, output *f
 	})
 }
 
-func geo(fb *chained.ChainedServerInfo, c *http.Client, workerID int, output *fullOutput) {
-	req, err := http.NewRequest("GET", "http://geo.getiantem.org/lookup/", nil)
+func verifyUpstream(fb *chained.ChainedServerInfo, c *http.Client, workerID int, output *fullOutput) {
+	req, err := http.NewRequest("GET", "http://linkdevice.nl/num.txt", nil)
 	if err != nil {
-		output.err = fmt.Errorf("%v: NewRequest to geo.getiantem.org failed: %v", fb.Addr, err)
+		output.err = fmt.Errorf("%v: NewRequest to linkdevice.nl failed: %v", fb.Addr, err)
 		return
 	}
 	doTest(fb, c, workerID, output, req, func(resp *http.Response, body []byte) error {
 		if resp.StatusCode != 200 {
 			return fmt.Errorf("%v: bad status code: %v", fb.Addr, resp.StatusCode)
 		}
-		if resp.Header.Get("X-Reflected-Ip") == "" {
-			return fmt.Errorf("Geolookup missing X-Reflected-Ip header")
+
+		if resp.Header.Get("x-amz-request-id") == "" {
+			return fmt.Errorf("Upstream missing x-amz-request-id header")
 		}
-		parsed := make(map[string]interface{}, 0)
-		err := json.Unmarshal(body, &parsed)
-		if err != nil {
-			return fmt.Errorf("Unable to parse geolookup body: %v", err)
+		if "12345678901234567890\n" != string(body) {
+			return fmt.Errorf("Wrong response body: %v", string(body))
 		}
 		return nil
 	})
