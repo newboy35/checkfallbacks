@@ -172,6 +172,9 @@ func testFallbackServer(fb *chained.ChainedServerInfo, workerID int) (output ful
 		Transport: &http.Transport{
 			Dial: dialer.Dial,
 		},
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			return http.ErrUseLastResponse
+		},
 	}
 	req, err := http.NewRequest("GET", "http://ping-chained-server", nil)
 	if err != nil {
@@ -180,13 +183,13 @@ func testFallbackServer(fb *chained.ChainedServerInfo, workerID int) (output ful
 	}
 	req.Header.Set(common.PingHeader, "1") // request 1 KB
 	req.Header.Set(common.DeviceIdHeader, DeviceID)
+	req.Header.Set(common.TokenHeader, fb.AuthToken)
 
 	if *verbose {
 		reqStr, _ := httputil.DumpRequestOut(req, true)
 		output.info = []string{"\n" + string(reqStr)}
 	}
 
-	req.Header.Set(common.TokenHeader, fb.AuthToken)
 	resp, err := c.Do(req)
 	if err != nil {
 		output.err = fmt.Errorf("%v: ping failed: %v", fb.Addr, err)
