@@ -35,7 +35,7 @@ var (
 	verbose       = flag.Bool("verbose", false, "Be verbose (useful for manual testing)")
 	fallbacksFile = flag.String("fallbacks", "fallbacks.json", "File containing json array of fallback information")
 	numConns      = flag.Int("connections", 1, "Number of simultaneous connections")
-	verify        = flag.Bool("verify", false, "Verify the functionality of the fallback")
+	verifyGeo     = flag.Bool("verify", false, "Set to true to verify upstream connectivity to geo.getiantem.org")
 )
 
 var (
@@ -56,7 +56,7 @@ func main() {
 
 	fallbacks := loadFallbacks(*fallbacksFile)
 	outputCh := testAllFallbacks(fallbacks)
-	for out := range *outputCh {
+	for out := range outputCh {
 		if out.err != nil {
 			fmt.Printf("[failed fallback check] %v\n", out.err)
 		}
@@ -102,9 +102,8 @@ type fullOutput struct {
 }
 
 // Test all fallback servers
-func testAllFallbacks(fallbacks [][]chained.ChainedServerInfo) (output *chan fullOutput) {
-	outputChan := make(chan fullOutput)
-	output = &outputChan
+func testAllFallbacks(fallbacks [][]chained.ChainedServerInfo) (output chan *fullOutput) {
+	output = make(chan *fullOutput)
 
 	// Make
 	numFallbacks := 0
@@ -131,21 +130,23 @@ func testAllFallbacks(fallbacks [][]chained.ChainedServerInfo) (output *chan ful
 			// Done() when closed (i.e. range exits)
 			go func(i int) {
 				for fb := range fbChan {
-					*output <- testFallbackServer(&fb, i)
+					output <- testFallbackServer(&fb, i)
 				}
 				workersWg.Done()
 			}(i + 1)
 		}
 		workersWg.Wait()
 
-		close(outputChan)
+		close(output)
 	}()
 
 	return
 }
 
 // Perform the test of an individual server
-func testFallbackServer(fb *chained.ChainedServerInfo, workerID int) (output fullOutput) {
+func testFallbackServer(fb *chained.ChainedServerInfo, workerID int) (output *fullOutput) {
+	output = &fullOutput{}
+
 	proto := "http"
 	if fb.Cert != "" {
 		proto = "https"
@@ -176,12 +177,57 @@ func testFallbackServer(fb *chained.ChainedServerInfo, workerID int) (output ful
 			return http.ErrUseLastResponse
 		},
 	}
+
+	if *verifyGeo {
+		geo(fb, c, workerID, output)
+	} else {
+		ping(fb, c, workerID, output)
+	}
+
+	return
+}
+
+func ping(fb *chained.ChainedServerInfo, c *http.Client, workerID int, output *fullOutput) {
 	req, err := http.NewRequest("GET", "http://ping-chained-server", nil)
 	if err != nil {
 		output.err = fmt.Errorf("%v: NewRequest to ping failed: %v", fb.Addr, err)
 		return
 	}
 	req.Header.Set(common.PingHeader, "1") // request 1 KB
+	doTest(fb, c, workerID, output, req, func(resp *http.Response, body []byte) error {
+		if resp.StatusCode != 200 {
+			return fmt.Errorf("%v: bad status code: %v", fb.Addr, resp.StatusCode)
+		}
+		if len(body) != 1024 {
+			return fmt.Errorf("%v: wrong body size: %d", fb.Addr, len(body))
+		}
+		return nil
+	})
+}
+
+func geo(fb *chained.ChainedServerInfo, c *http.Client, workerID int, output *fullOutput) {
+	req, err := http.NewRequest("GET", "http://geo.getiantem.org/lookup/", nil)
+	if err != nil {
+		output.err = fmt.Errorf("%v: NewRequest to geo.getiantem.org failed: %v", fb.Addr, err)
+		return
+	}
+	doTest(fb, c, workerID, output, req, func(resp *http.Response, body []byte) error {
+		if resp.StatusCode != 200 {
+			return fmt.Errorf("%v: bad status code: %v", fb.Addr, resp.StatusCode)
+		}
+		if resp.Header.Get("X-Reflected-Ip") == "" {
+			return fmt.Errorf("Geolookup missing X-Reflected-Ip header")
+		}
+		parsed := make(map[string]interface{}, 0)
+		err := json.Unmarshal(body, &parsed)
+		if err != nil {
+			return fmt.Errorf("Unable to parse geolookup body: %v", err)
+		}
+		return nil
+	})
+}
+
+func doTest(fb *chained.ChainedServerInfo, c *http.Client, workerID int, output *fullOutput, req *http.Request, verify func(resp *http.Response, body []byte) error) {
 	req.Header.Set(common.DeviceIdHeader, DeviceID)
 	req.Header.Set(common.TokenHeader, fb.AuthToken)
 
@@ -204,24 +250,17 @@ func testFallbackServer(fb *chained.ChainedServerInfo, workerID int) (output ful
 			log.Debugf("Unable to close response body: %v", closeErr)
 		}
 	}()
-	if resp.StatusCode != 200 {
-		output.err = fmt.Errorf("%v: bad status code: %v", fb.Addr, resp.StatusCode)
-		return
-	}
-	bytes, err := ioutil.ReadAll(resp.Body)
+	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		output.err = fmt.Errorf("%v: error reading response body: %v", fb.Addr, err)
 		return
 	}
-	if len(bytes) != 1024 {
-		output.err = fmt.Errorf("%v: wrong body size: %d", fb.Addr, len(bytes))
+
+	err = verify(resp, body)
+	if err != nil {
+		output.err = err
 		return
 	}
 
 	log.Debugf("Worker %d: Fallback %v OK.\n", workerID, fb.Addr)
-
-	if *verify {
-		verifyFallback(fb, c)
-	}
-	return
 }
