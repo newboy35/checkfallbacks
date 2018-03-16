@@ -1,7 +1,7 @@
 package: github.com/getlantern/checkfallbacks
 import:
 - package: github.com/getlantern/flashlight
-  version: ae910953669c69094edf518ad6ae36cce05268d5
+  version: 956f6b077a438fcc0867a2460b222c104b0e9975
   subpackages:
   - client
 - package: github.com/getlantern/golog

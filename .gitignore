@@ -1,2 +1,7 @@
 checkfallbacks
+checkfallbacks.bak
+checkfallbacks.exe
 vendor
+.DS_Store
+fallbacks.json
+masquerade_cache
