@@ -5,3 +5,4 @@ import:
   subpackages:
   - client
 - package: github.com/getlantern/golog
+- package: github.com/mitchellh/go-homedir
