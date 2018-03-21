@@ -5,21 +5,30 @@
 package main
 
 import (
+	"compress/gzip"
+	"context"
 	"encoding/json"
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"net/http/httputil"
 	"os"
 	"runtime"
 	"strings"
 	"sync"
+	"time"
 
+	"github.com/getlantern/errors"
 	"github.com/getlantern/flashlight/chained"
 	"github.com/getlantern/flashlight/client"
 	"github.com/getlantern/flashlight/common"
+	"github.com/getlantern/flashlight/config"
+	"github.com/getlantern/fronted"
 	"github.com/getlantern/golog"
+	"github.com/getlantern/keyman"
+	"github.com/getlantern/yaml"
 )
 
 const (
@@ -54,6 +63,7 @@ func main() {
 	runtime.GOMAXPROCS(numcores)
 	log.Debugf("Using all %d cores on machine", numcores)
 
+	initFronted()
 	fallbacks := loadFallbacks(*fallbacksFile)
 	outputCh := testAllFallbacks(fallbacks)
 	for out := range outputCh {
@@ -66,6 +76,45 @@ func main() {
 			}
 		}
 	}
+}
+
+func initFronted() {
+	resp, err := http.Get("https://globalconfig.flashlightproxy.com/global.yaml.gz")
+	if err != nil {
+		log.Fatalf("Unable to get global config: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		log.Fatalf("Unexpected response status fetching global config: %v", resp.Status)
+	}
+
+	gzipReader, err := gzip.NewReader(resp.Body)
+	if err != nil {
+		log.Fatalf("Unable to open gzip reader for global config: %v", err)
+	}
+
+	bytes, err := ioutil.ReadAll(gzipReader)
+	if err != nil {
+		log.Fatalf("Unable to read global config yaml: %v", err)
+	}
+
+	cfg := &config.Global{}
+	err = yaml.Unmarshal(bytes, cfg)
+	if err != nil {
+		log.Fatalf("Unable to unmarshal global config yaml: %v", err)
+	}
+
+	certs := make([]string, 0, len(cfg.TrustedCAs))
+	for _, ca := range cfg.TrustedCAs {
+		certs = append(certs, ca.Cert)
+	}
+	pool, err := keyman.PoolContainingCerts(certs...)
+	if err != nil {
+		log.Fatalf("Could not create pool of trusted fronting CAs: %v", err)
+	}
+
+	fronted.Configure(pool, cfg.Client.MasqueradeSets, "masquerade_cache")
 }
 
 // Load the fallback servers list file. Failure to do so will result in
@@ -171,7 +220,16 @@ func testFallbackServer(fb *chained.ChainedServerInfo, workerID int) (output *fu
 	}
 	c := &http.Client{
 		Transport: &http.Transport{
-			Dial: dialer.Dial,
+			Dial: func(network, addr string) (net.Conn, error) {
+				dialer.Preconnect()
+				select {
+				case d := <-dialer.Preconnected():
+					conn, _, err := d.DialContext(context.Background(), network, addr)
+					return conn, err
+				case <-time.After(15 * time.Second):
+					return nil, errors.New("Timeout dialing")
+				}
+			},
 		},
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
 			return http.ErrUseLastResponse
