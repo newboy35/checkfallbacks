@@ -1,5 +1,5 @@
-hash: b593aecff3010f28987a89b13f6f6fe78286597fe7c05bc43bb212bb3c106ae5
-updated: 2018-03-16T15:43:20.210247-05:00
+hash: 1eb52d4789ec2bf35f7481739849b3fb9acd06cdabcf7c484115761186895ee1
+updated: 2018-03-20T01:32:39.485426-07:00
 imports:
 - name: git.torproject.org/pluggable-transports/goptlib.git
   version: a3ad5df6c9e7dc8117f55958b4ce99bf1e0fe291
@@ -32,7 +32,7 @@ imports:
 - name: github.com/fatih/set
   version: 168a5d71ba0669ae06888225478d73a113f1687e
 - name: github.com/getlantern/appdir
-  version: 659a155d06e8f3dd8b9f79d6147445897499b56b
+  version: d1a26082a4196185d59bf52eb23d4ea2588c8838
 - name: github.com/getlantern/bandwidth
   version: 96de96fff16cf1aa844edc1b4a72c906add83180
 - name: github.com/getlantern/borda
@@ -193,6 +193,12 @@ imports:
   version: 0fb14efe8c47ae851c0034ed7a448854d3d34cf3
   subpackages:
   - simplelru
+- name: github.com/klauspost/cpuid
+  version: eae9b3e628d72774e13bdf024e78c0802f85a5b9
+- name: github.com/klauspost/reedsolomon
+  version: e52c150f961e65ab9538bf1276b33bf469f919d8
+- name: github.com/mitchellh/go-homedir
+  version: b8bc1bf767474819792c23f32d8286a45736f1c6
 - name: github.com/mitchellh/mapstructure
   version: 00c29f56e2386353d58c599509e8dc3801b0d716
 - name: github.com/oschwald/geoip2-golang
