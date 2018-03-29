@@ -1,5 +1,5 @@
 hash: 32f0a79d7bf405c12e17d605f42bd89c76a36922bd2ebaacf8bee4d41ed6c9fd
-updated: 2018-03-29T10:24:42.470041-05:00
+updated: 2018-03-29T10:33:04.883999-05:00
 imports:
 - name: git.torproject.org/pluggable-transports/goptlib.git
   version: 7d56ec4f381e8b1aedfda360594e35a5731b5337
@@ -68,7 +68,7 @@ imports:
 - name: github.com/getlantern/filepersist
   version: c5f0cd24e7991579ba6f5f1bd20a1ad2c9f06cd4
 - name: github.com/getlantern/flashlight
-  version: 956f6b077a438fcc0867a2460b222c104b0e9975
+  version: 6ae40d9769b538a197c644afd95db848f9d02f55
   subpackages:
   - balancer
   - buffers
