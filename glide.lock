@@ -1,8 +1,8 @@
-hash: 1eb52d4789ec2bf35f7481739849b3fb9acd06cdabcf7c484115761186895ee1
-updated: 2018-03-20T01:32:39.485426-07:00
+hash: 32f0a79d7bf405c12e17d605f42bd89c76a36922bd2ebaacf8bee4d41ed6c9fd
+updated: 2018-03-29T10:24:42.470041-05:00
 imports:
 - name: git.torproject.org/pluggable-transports/goptlib.git
-  version: a3ad5df6c9e7dc8117f55958b4ce99bf1e0fe291
+  version: 7d56ec4f381e8b1aedfda360594e35a5731b5337
 - name: git.torproject.org/pluggable-transports/obfs4.git
   version: af4824cb0b2c36a0eba4bc1590eb0737302e992e
   subpackages:
@@ -20,7 +20,7 @@ imports:
   - edwards25519
   - extra25519
 - name: github.com/aristanetworks/goarista
-  version: 731587b8d73c3a00e6c57f1debbb36e0fe575a35
+  version: 9cf7f6b188ea30684caffe3d18e03e61d7193e25
   subpackages:
   - monotime
 - name: github.com/armon/go-radix
@@ -32,7 +32,7 @@ imports:
 - name: github.com/fatih/set
   version: 168a5d71ba0669ae06888225478d73a113f1687e
 - name: github.com/getlantern/appdir
-  version: d1a26082a4196185d59bf52eb23d4ea2588c8838
+  version: 7c0f9d241ea78ff68bf3aecfe2ea2009ff8500cf
 - name: github.com/getlantern/bandwidth
   version: 96de96fff16cf1aa844edc1b4a72c906add83180
 - name: github.com/getlantern/borda
@@ -102,7 +102,7 @@ imports:
 - name: github.com/getlantern/hidden
   version: d52a649ab33af200943bb599898dbdcfdbc94cb7
 - name: github.com/getlantern/httpseverywhere
-  version: 6b35e371cb97a0b0c78a38b0731a31ba0a9b3968
+  version: 9bdb93e40695deb035a35f1ef7f2dfd8de7df2df
 - name: github.com/getlantern/i18n
   version: 293a8dd143490b99a1fb1ae28cf1d421f10f296f
 - name: github.com/getlantern/idletiming
@@ -136,11 +136,11 @@ imports:
 - name: github.com/getlantern/ops
   version: 37353306c90844c8e0591956f56611f46299d202
 - name: github.com/getlantern/preconn
-  version: 9d78068db81b714e7612e5d43030ee2e1ce6c49a
+  version: 0b5766010efe7a5fd5c9c5675ed83ed167908418
 - name: github.com/getlantern/proxiedsites
   version: 996122c1374578a85a536445d7d7ae88d3ee5a35
 - name: github.com/getlantern/proxy
-  version: bf5c9f61677cf800e1b560a10c89ea5955f74f65
+  version: afe965b8c237b91043ad31beac695e3224c8c34e
   subpackages:
   - filters
 - name: github.com/getlantern/reconn
@@ -180,7 +180,7 @@ imports:
   - rpc
   - sql
 - name: github.com/golang/protobuf
-  version: bbd03ef6da3a115852eaf24c8a1c46aeb39aa175
+  version: e09c5db296004fbe3f74490e84dcd62c3c5ddb1b
   subpackages:
   - proto
   - ptypes
@@ -193,10 +193,6 @@ imports:
   version: 0fb14efe8c47ae851c0034ed7a448854d3d34cf3
   subpackages:
   - simplelru
-- name: github.com/klauspost/cpuid
-  version: eae9b3e628d72774e13bdf024e78c0802f85a5b9
-- name: github.com/klauspost/reedsolomon
-  version: e52c150f961e65ab9538bf1276b33bf469f919d8
 - name: github.com/mitchellh/go-homedir
   version: b8bc1bf767474819792c23f32d8286a45736f1c6
 - name: github.com/mitchellh/mapstructure
@@ -234,7 +230,7 @@ imports:
 - name: github.com/Yawning/chacha20
   version: e3b1f968fc6397b51d963fee8ec8711a47bc0ce8
 - name: golang.org/x/crypto
-  version: 374053ea96cb300f8671b8d3b07edeeb06e203b4
+  version: 88942b9c40a4c9d203b82b3731787b672d6e809b
   subpackages:
   - blowfish
   - cast5
@@ -251,7 +247,7 @@ imports:
   - twofish
   - xtea
 - name: golang.org/x/net
-  version: e0c57d8f86c17f0724497efcb3bc617e82834821
+  version: 6078986fec03a1dcc236c34816c71b0e05018fda
   repo: https://github.com/golang/net
   vcs: git
   subpackages:
@@ -267,21 +263,21 @@ imports:
   - lex/httplex
   - trace
 - name: golang.org/x/sys
-  version: 2f1e207ee39ff70f3433e49c6eb52677a515e3b5
+  version: 378d26f46672a356c46195c28f61bdb4c0a781dd
   repo: https://github.com/golang/sys
   vcs: git
   subpackages:
   - unix
   - windows
 - name: golang.org/x/text
-  version: 8c34f848e18c4bd34d02db7f19a0ed1a0a8f5852
+  version: ece95c760240037f89ebcbdd7155ac8cb52e38fa
   subpackages:
   - secure/bidirule
   - transform
   - unicode/bidi
   - unicode/norm
 - name: google.golang.org/appengine
-  version: 5bee14b453b4c71be47ec1781b0fa61c2ea182db
+  version: 138cbf02a83223cf40a1e4b7834cc0a732fb383b
   subpackages:
   - datastore
   - internal
@@ -292,11 +288,11 @@ imports:
   - internal/modules
   - internal/remote_api
 - name: google.golang.org/genproto
-  version: f8c8703595236ae70fdf8789ecb656ea0bcdcf46
+  version: ab0870e398d5dd054b868c0db1481ab029b9a9f2
   subpackages:
   - googleapis/rpc/status
 - name: google.golang.org/grpc
-  version: ec9275ba9aded9f4dade1cde439fdb3f40d98d03
+  version: f72b28a6d170d0938afd483331ba4e5d733785ae
   subpackages:
   - balancer
   - balancer/base
