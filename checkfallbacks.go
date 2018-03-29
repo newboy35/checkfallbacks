@@ -18,6 +18,7 @@ import (
 	"runtime"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/getlantern/errors"
@@ -45,6 +46,7 @@ var (
 	fallbacksFile = flag.String("fallbacks", "fallbacks.json", "File containing json array of fallback information")
 	numConns      = flag.Int("connections", 1, "Number of simultaneous connections")
 	verify        = flag.Bool("verify", false, "Set to true to verify upstream connectivity")
+	timeout       = flag.Duration("timeout", 30*time.Second, "Time out checks after this time amount of time")
 )
 
 var (
@@ -167,6 +169,8 @@ func testAllFallbacks(fallbacks [][]chained.ChainedServerInfo) (output chan *ful
 	}
 	close(fbChan)
 
+	testedCount := int64(0)
+
 	// Spawn goroutines and wait for them to finish
 	go func() {
 		workersWg := sync.WaitGroup{}
@@ -180,6 +184,7 @@ func testAllFallbacks(fallbacks [][]chained.ChainedServerInfo) (output chan *ful
 			go func(i int) {
 				for fb := range fbChan {
 					output <- testFallbackServer(&fb, i)
+					log.Debugf("Tested %d / %d", atomic.AddInt64(&testedCount, 1), numFallbacks)
 				}
 				workersWg.Done()
 			}(i + 1)
@@ -286,39 +291,49 @@ func verifyUpstream(fb *chained.ChainedServerInfo, c *http.Client, workerID int,
 }
 
 func doTest(fb *chained.ChainedServerInfo, c *http.Client, workerID int, output *fullOutput, req *http.Request, verify func(resp *http.Response, body []byte) error) {
-	req.Header.Set(common.DeviceIdHeader, DeviceID)
-	req.Header.Set(common.TokenHeader, fb.AuthToken)
+	errCh := make(chan error, 0)
 
-	if *verbose {
-		reqStr, _ := httputil.DumpRequestOut(req, true)
-		output.info = []string{"\n" + string(reqStr)}
-	}
+	go func() {
+		req.Header.Set(common.DeviceIdHeader, DeviceID)
+		req.Header.Set(common.TokenHeader, fb.AuthToken)
 
-	resp, err := c.Do(req)
-	if err != nil {
-		output.err = fmt.Errorf("%v: ping failed: %v", fb.Addr, err)
-		return
-	}
-	if *verbose {
-		respStr, _ := httputil.DumpResponse(resp, true)
-		output.info = append(output.info, "\n"+string(respStr))
-	}
-	defer func() {
-		if closeErr := resp.Body.Close(); closeErr != nil {
-			log.Debugf("Unable to close response body: %v", closeErr)
+		if *verbose {
+			reqStr, _ := httputil.DumpRequestOut(req, true)
+			output.info = []string{"\n" + string(reqStr)}
 		}
+
+		resp, err := c.Do(req)
+		if err != nil {
+			errCh <- fmt.Errorf("%v: ping failed: %v", fb.Addr, err)
+			return
+		}
+		if *verbose {
+			respStr, _ := httputil.DumpResponse(resp, true)
+			output.info = append(output.info, "\n"+string(respStr))
+		}
+		defer func() {
+			if closeErr := resp.Body.Close(); closeErr != nil {
+				log.Debugf("Unable to close response body: %v", closeErr)
+			}
+		}()
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			errCh <- fmt.Errorf("%v: error reading response body: %v", fb.Addr, err)
+			return
+		}
+
+		err = verify(resp, body)
+		errCh <- err
 	}()
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		output.err = fmt.Errorf("%v: error reading response body: %v", fb.Addr, err)
-		return
-	}
 
-	err = verify(resp, body)
-	if err != nil {
-		output.err = err
-		return
+	select {
+	case err := <-errCh:
+		if err != nil {
+			output.err = err
+		} else {
+			log.Debugf("Worker %d: Fallback %v OK.\n", workerID, fb.Addr)
+		}
+	case <-time.After(*timeout):
+		output.err = fmt.Errorf("%v: check timed out", fb.Addr)
 	}
-
-	log.Debugf("Worker %d: Fallback %v OK.\n", workerID, fb.Addr)
 }
