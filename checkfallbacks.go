@@ -216,10 +216,10 @@ func testFallbackServer(fb *chained.ChainedServerInfo, workerID int) (output *fu
 	}
 	name := fmt.Sprintf("%v (%v)", fb.Addr, proto)
 	log.Debugf("Testing %v", name)
+	fb.InitPreconnect = 1
 	fb.MaxPreconnect = 1
-	dialer, err := client.ChainedDialer(name, fb, DeviceID, func() string {
-		return "" // pro-token
-	})
+	userCfg := common.NewUserConfigData(DeviceID, 0, "", nil)
+	dialer, err := client.ChainedDialer(name, fb, userCfg)
 	if err != nil {
 		output.err = fmt.Errorf("%v: error building dialer: %v", fb.Addr, err)
 		return
