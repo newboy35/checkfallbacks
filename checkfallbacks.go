@@ -21,7 +21,6 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/getlantern/errors"
 	"github.com/getlantern/flashlight/chained"
 	"github.com/getlantern/flashlight/client"
 	"github.com/getlantern/flashlight/common"
@@ -116,7 +115,7 @@ func initFronted() {
 		log.Fatalf("Could not create pool of trusted fronting CAs: %v", err)
 	}
 
-	fronted.Configure(pool, cfg.Client.MasqueradeSets, "masquerade_cache")
+	fronted.Configure(pool, cfg.Client.FrontedProviders(), "cloudfront", "masquerade_cache")
 }
 
 // Load the fallback servers list file. Failure to do so will result in
@@ -216,9 +215,8 @@ func testFallbackServer(fb *chained.ChainedServerInfo, workerID int) (output *fu
 	}
 	name := fmt.Sprintf("%v (%v)", fb.Addr, proto)
 	log.Debugf("Testing %v", name)
-	fb.InitPreconnect = 1
 	fb.MaxPreconnect = 1
-	userCfg := common.NewUserConfigData(DeviceID, 0, "", nil)
+	userCfg := common.NewUserConfigData(DeviceID, 0, "", nil, "")
 	dialer, err := client.ChainedDialer(name, fb, userCfg)
 	if err != nil {
 		output.err = fmt.Errorf("%v: error building dialer: %v", fb.Addr, err)
@@ -227,14 +225,10 @@ func testFallbackServer(fb *chained.ChainedServerInfo, workerID int) (output *fu
 	c := &http.Client{
 		Transport: &http.Transport{
 			Dial: func(network, addr string) (net.Conn, error) {
-				dialer.Preconnect()
-				select {
-				case d := <-dialer.Preconnected():
-					conn, _, err := d.DialContext(context.Background(), network, addr)
-					return conn, err
-				case <-time.After(15 * time.Second):
-					return nil, errors.New("Timeout dialing")
-				}
+				ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+				defer cancel()
+				conn, _, err := dialer.DialContext(ctx, network, addr)
+				return conn, err
 			},
 		},
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
