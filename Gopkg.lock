@@ -62,6 +62,29 @@
   version = "v1.0.0"
 
 [[projects]]
+  digest = "1:f438d91be142877c3ad83157992c91de787ddfbddcc2a7da1ef6ef61606cadc4"
+  name = "github.com/cheekybits/genny"
+  packages = ["generic"]
+  pruneopts = "UT"
+  revision = "d2cf3cdd35ce0d789056c4bc02a4d6349c947caf"
+  version = "v1.0.0"
+
+[[projects]]
+  branch = "master"
+  digest = "1:c61f241352b7fba13cd70aeb1311a5519305897d91df5fdccd39ae6099be84a0"
+  name = "github.com/cloudflare/sidh"
+  packages = [
+    "internal/arith",
+    "internal/isogeny",
+    "internal/utils",
+    "p503",
+    "p751",
+    "sidh",
+  ]
+  pruneopts = "UT"
+  revision = "fc8e6378752b38efe6d5814630911b5fc654c223"
+
+[[projects]]
   branch = "master"
   digest = "1:4c4c33075b704791d6a7f09dfb55c66769e8a1dc6adf87026292d274fe8ad113"
   name = "github.com/codahale/hdrhistogram"
@@ -242,7 +265,7 @@
 
 [[projects]]
   branch = "devel"
-  digest = "1:6a42c66d1ead4d0115dd7587f4bc2a8c126eb393f0300aefb9a400226f7d2435"
+  digest = "1:33bc078e7018d7e785ad8a62949ea5ed03ba86e37d590016088b0bd4462a69e2"
   name = "github.com/getlantern/flashlight"
   packages = [
     "balancer",
@@ -261,7 +284,7 @@
     "status",
   ]
   pruneopts = "UT"
-  revision = "87d81129f622c896384700a26f94e7467856c5d8"
+  revision = "c7fd7392d0bb888075ec36cad28695f028eec94d"
 
 [[projects]]
   branch = "master"
@@ -393,11 +416,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:6f79178b6fa7bad1c5f4787362bbc258cbc7cfd110b1389ef012110888d7e437"
+  digest = "1:e40802768fe627c8d764d92c99eee93ca8d68a69e797677770bda9e6f250a959"
   name = "github.com/getlantern/lampshade"
   packages = ["."]
   pruneopts = "UT"
-  revision = "0c3a8c74849c4b6f7df8ddc9f490229b7b17eb9c"
+  revision = "6c4b0038448a4771ff1e7105d438543b4139b1c5"
 
 [[projects]]
   branch = "master"
@@ -444,11 +467,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:30181df0b6eeb2a6cd136d480b6f688658c7976793fa83e00a731859a680dd05"
+  digest = "1:50425f63a4348b642f1ce2a343b86077e62f98153d1bf00d9bc3387524e71872"
   name = "github.com/getlantern/netx"
   packages = ["."]
   pruneopts = "UT"
-  revision = "2e444869f9f5c45c651ee847e4a2ea27231ecec9"
+  revision = "9912de6f94fd1dd35a2f3af9a9ce5650d1a10b7a"
 
 [[projects]]
   branch = "master"
@@ -484,6 +507,14 @@
   ]
   pruneopts = "UT"
   revision = "3f472f8f4fe8a92c88c7309300729dbb16dad174"
+
+[[projects]]
+  branch = "master"
+  digest = "1:e5baaf124b9b31538eadaf72bce33b3fa54c8ffad2bd42a2e8eea46354a341a7"
+  name = "github.com/getlantern/quicwrapper"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "f6dd70305d8ec1ce65c767ebc4d7ef6e3ee36499"
 
 [[projects]]
   branch = "master"
@@ -628,6 +659,33 @@
   ]
   pruneopts = "UT"
   revision = "20f1fb78b0740ba8c3cb143a61e86ba5c8669768"
+
+[[projects]]
+  branch = "master"
+  digest = "1:5aebe1b0003ac7874ef27a50bb1d94c5e8f090a0459393711b2fc926d60e41e9"
+  name = "github.com/lucas-clemente/quic-go"
+  packages = [
+    ".",
+    "internal/ackhandler",
+    "internal/congestion",
+    "internal/flowcontrol",
+    "internal/handshake",
+    "internal/protocol",
+    "internal/qerr",
+    "internal/utils",
+    "internal/wire",
+  ]
+  pruneopts = "UT"
+  revision = "ca35f392a8ec033ad8bdbbc45cca49b7e0e3adaa"
+  source = "https://github.com/getlantern/quic-go"
+
+[[projects]]
+  branch = "qtls"
+  digest = "1:6eb76d7a2daca2297f53d2ef02fdeaef9bfbac0e75ffb77a72131f1708db4f31"
+  name = "github.com/marten-seemann/qtls"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "646330209b76bfdcdc054a863468f473e9d0a7af"
 
 [[projects]]
   digest = "1:78bbb1ba5b7c3f2ed0ea1eab57bdd3859aec7e177811563edc41198a760b06af"
@@ -824,6 +882,14 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:75515eedc0dc2cb0b40372008b616fa2841d831c63eedd403285ff286c593295"
+  name = "golang.org/x/sync"
+  packages = ["semaphore"]
+  pruneopts = "UT"
+  revision = "37e7f081c4d4c64e13b10787722085407fe5d15f"
+
+[[projects]]
+  branch = "master"
   digest = "1:c640964729379798b492e5ddd4a78eb496b78b5f03ad3d719e7d4bbb326da22f"
   name = "golang.org/x/sys"
   packages = [
@@ -942,7 +1008,6 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
-    "github.com/getlantern/errors",
     "github.com/getlantern/flashlight/chained",
     "github.com/getlantern/flashlight/client",
     "github.com/getlantern/flashlight/common",
