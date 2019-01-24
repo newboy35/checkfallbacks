@@ -26,6 +26,15 @@
   name = "github.com/templexxx/reedsolomon"
   version = "0.1.1"
 
+[[override]]
+  name = "github.com/lucas-clemente/quic-go"
+  branch = "master"
+  source = "https://github.com/getlantern/quic-go"
+
+[[override]]
+  name = "github.com/marten-seemann/qtls"
+  branch = "qtls"
+
 [prune]
   go-tests = true
   unused-packages = true
