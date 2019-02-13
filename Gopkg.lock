@@ -265,7 +265,7 @@
 
 [[projects]]
   branch = "devel"
-  digest = "1:33bc078e7018d7e785ad8a62949ea5ed03ba86e37d590016088b0bd4462a69e2"
+  digest = "1:017e00c9b620cbeb5c65d9210eeb330c39a22a8e1f3a08387a25524ae1563f3c"
   name = "github.com/getlantern/flashlight"
   packages = [
     "balancer",
@@ -284,7 +284,7 @@
     "status",
   ]
   pruneopts = "UT"
-  revision = "c7fd7392d0bb888075ec36cad28695f028eec94d"
+  revision = "a194e6cacf810b84ce52509a64a6ab090faa5838"
 
 [[projects]]
   branch = "master"
