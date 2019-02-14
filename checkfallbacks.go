@@ -69,8 +69,11 @@ func main() {
 	fallbacks := loadFallbacks(*fallbacksFile)
 	outputCh := testAllFallbacks(fallbacks)
 	for out := range outputCh {
+		// Scripts in lanter_aws repo expect the output formats below.
 		if out.err != nil {
 			fmt.Printf("[failed fallback check] %v\n", out.err)
+		} else {
+			fmt.Printf("Fallback %s OK.\n", out.addr)
 		}
 		if *verbose && len(out.info) > 0 {
 			for _, msg := range out.info {
@@ -148,6 +151,7 @@ func loadFallbacks(filename string) (fallbacks [][]chained.ChainedServerInfo) {
 }
 
 type fullOutput struct {
+	addr string
 	err  error
 	info []string
 }
@@ -199,7 +203,7 @@ func testAllFallbacks(fallbacks [][]chained.ChainedServerInfo) (output chan *ful
 
 // Perform the test of an individual server
 func testFallbackServer(fb *chained.ChainedServerInfo, workerID int) (output *fullOutput) {
-	output = &fullOutput{}
+	output = &fullOutput{addr: fb.Addr}
 
 	proto := "http"
 	if fb.Cert != "" {
