@@ -1,8 +1,4 @@
 [[constraint]]
-  branch = "master"
-  name = "github.com/getlantern/errors"
-
-[[constraint]]
   branch = "devel"
   name = "github.com/getlantern/flashlight"
 

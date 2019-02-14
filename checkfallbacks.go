@@ -45,6 +45,7 @@ var (
 	fallbacksFile = flag.String("fallbacks", "fallbacks.json", "File containing json array of fallback information")
 	numConns      = flag.Int("connections", 1, "Number of simultaneous connections")
 	verify        = flag.Bool("verify", false, "Set to true to verify upstream connectivity")
+	checks        = flag.Int("checks", 1, "Number of times to check in each connection. Useful to detect blocking after a few packets being exchanged")
 	timeout       = flag.Duration("timeout", 30*time.Second, "Time out checks after this time amount of time")
 )
 
@@ -68,8 +69,11 @@ func main() {
 	fallbacks := loadFallbacks(*fallbacksFile)
 	outputCh := testAllFallbacks(fallbacks)
 	for out := range outputCh {
+		// Scripts in lanter_aws repo expect the output formats below.
 		if out.err != nil {
 			fmt.Printf("[failed fallback check] %v\n", out.err)
+		} else {
+			fmt.Printf("Fallback %s OK.\n", out.addr)
 		}
 		if *verbose && len(out.info) > 0 {
 			for _, msg := range out.info {
@@ -147,6 +151,7 @@ func loadFallbacks(filename string) (fallbacks [][]chained.ChainedServerInfo) {
 }
 
 type fullOutput struct {
+	addr string
 	err  error
 	info []string
 }
@@ -198,7 +203,7 @@ func testAllFallbacks(fallbacks [][]chained.ChainedServerInfo) (output chan *ful
 
 // Perform the test of an individual server
 func testFallbackServer(fb *chained.ChainedServerInfo, workerID int) (output *fullOutput) {
-	output = &fullOutput{}
+	output = &fullOutput{addr: fb.Addr}
 
 	proto := "http"
 	if fb.Cert != "" {
@@ -238,10 +243,12 @@ func testFallbackServer(fb *chained.ChainedServerInfo, workerID int) (output *fu
 		},
 	}
 
-	if *verify {
-		verifyUpstream(fb, c, workerID, output)
-	} else {
-		ping(fb, c, workerID, output)
+	for i := 0; i < *checks; i++ {
+		if *verify {
+			verifyUpstream(fb, c, workerID, output)
+		} else {
+			ping(fb, c, workerID, output)
+		}
 	}
 
 	return
@@ -326,8 +333,6 @@ func doTest(fb *chained.ChainedServerInfo, c *http.Client, workerID int, output 
 	case err := <-errCh:
 		if err != nil {
 			output.err = err
-		} else {
-			log.Debugf("Worker %d: Fallback %v OK.\n", workerID, fb.Addr)
 		}
 	case <-time.After(*timeout):
 		output.err = fmt.Errorf("%v: check timed out", fb.Addr)
