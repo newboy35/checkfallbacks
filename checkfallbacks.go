@@ -5,6 +5,7 @@
 package main
 
 import (
+	"bytes"
 	"compress/gzip"
 	"context"
 	"encoding/json"
@@ -273,9 +274,9 @@ func ping(fb *chained.ChainedServerInfo, c *http.Client, workerID int, output *f
 }
 
 func verifyUpstream(fb *chained.ChainedServerInfo, c *http.Client, workerID int, output *fullOutput) {
-	req, err := http.NewRequest("GET", "http://linkdevice.nl/num.txt", nil)
+	req, err := http.NewRequest("GET", "http://config.getiantem.org/proxies.yaml.gz", nil)
 	if err != nil {
-		output.err = fmt.Errorf("%v: NewRequest to linkdevice.nl failed: %v", fb.Addr, err)
+		output.err = fmt.Errorf("%v: NewRequest to config.getiantem.org failed: %v", fb.Addr, err)
 		return
 	}
 	doTest(fb, c, workerID, output, req, func(resp *http.Response, body []byte) error {
@@ -283,12 +284,20 @@ func verifyUpstream(fb *chained.ChainedServerInfo, c *http.Client, workerID int,
 			return fmt.Errorf("%v: bad status code: %v", fb.Addr, resp.StatusCode)
 		}
 
-		if resp.Header.Get("x-amz-request-id") == "" {
-			return fmt.Errorf("Upstream missing x-amz-request-id header")
+		r, err := gzip.NewReader(bytes.NewReader(body))
+		if err != nil {
+			return fmt.Errorf("%v: can't open gzip reader for config body: %v", fb.Addr, err)
 		}
-		if "12345678901234567890\n" != string(body) {
-			return fmt.Errorf("Wrong response body: %v", string(body))
+		cfg, err := ioutil.ReadAll(r)
+		if err != nil {
+			return fmt.Errorf("%v: can't read config body: %v", fb.Addr, err)
 		}
+
+		cfgs := make(map[string]*chained.ChainedServerInfo)
+		if parseErr := yaml.Unmarshal(cfg, cfgs); parseErr != nil {
+			return fmt.Errorf("%v: can't parse config response: %v", fb.Addr, parseErr)
+		}
+
 		return nil
 	})
 }
