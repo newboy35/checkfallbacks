@@ -662,7 +662,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:5aebe1b0003ac7874ef27a50bb1d94c5e8f090a0459393711b2fc926d60e41e9"
+  digest = "1:025fb66f977973c52bc653a8f1bb8b2ce13ba3ed1d9ebf736802f2bc41d9e424"
   name = "github.com/lucas-clemente/quic-go"
   packages = [
     ".",
@@ -676,16 +676,17 @@
     "internal/wire",
   ]
   pruneopts = "UT"
-  revision = "ca35f392a8ec033ad8bdbbc45cca49b7e0e3adaa"
+  revision = "f9d7a8b53ff5f906746398fcb891200f96f754f0"
   source = "https://github.com/getlantern/quic-go"
 
 [[projects]]
   branch = "qtls"
-  digest = "1:6eb76d7a2daca2297f53d2ef02fdeaef9bfbac0e75ffb77a72131f1708db4f31"
+  digest = "1:1d3142fa76462447ac41ff6a71a2796b74494f7002ff6005f095430315d41660"
   name = "github.com/marten-seemann/qtls"
   packages = ["."]
   pruneopts = "UT"
-  revision = "646330209b76bfdcdc054a863468f473e9d0a7af"
+  revision = "591c71538704125b0b189f4cd3c0e61485dd6ef7"
+  source = "https://github.com/marten-seemann/qtls-deprecated"
 
 [[projects]]
   digest = "1:78bbb1ba5b7c3f2ed0ea1eab57bdd3859aec7e177811563edc41198a760b06af"
