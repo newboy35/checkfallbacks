@@ -217,6 +217,8 @@ func testFallbackServer(fb *chained.ChainedServerInfo, workerID int) (output *fu
 		proto = "lampshade"
 	case "quic":
 		proto = "quic"
+	case "wss":
+		proto = "wss"
 	}
 	if fb.KCPSettings != nil && len(fb.KCPSettings) > 0 {
 		proto = "kcp"
