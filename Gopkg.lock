@@ -142,19 +142,19 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:a244bc7b14a0c974aa095cddaad2a3672f9f4342f8b0786076bd74b36f2c7c3d"
-  name = "github.com/getlantern/bandwidth"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "96de96fff16cf1aa844edc1b4a72c906add83180"
-
-[[projects]]
-  branch = "master"
   digest = "1:a42a37837df41f7b02f2b3831d21b1b1275193803280fa9983dfe35cf9aa6b49"
   name = "github.com/getlantern/borda"
   packages = ["client"]
   pruneopts = "UT"
   revision = "189ea590cfa2838a36850b36004f2ee47395939a"
+
+[[projects]]
+  branch = "master"
+  digest = "1:8e02518e7a9d6781802466e602296d19c4d2eca0131a5d50876725b7e85a70d1"
+  name = "github.com/getlantern/bufconn"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "6402607914eb123dd0adc0a4c7845286dc18acef"
 
 [[projects]]
   branch = "master"
@@ -198,14 +198,6 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:e96cea92d51116be86b83994067f6c51f079135a1283fd47b9ba4d20eacd01e6"
-  name = "github.com/getlantern/easylist"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "42a110754e2c8027797aca3783609d846a8c1b56"
-
-[[projects]]
-  branch = "master"
   digest = "1:efdd91b82e28f23d8485c9639f1bd47337dd80189d7209ee369876a1f1a18016"
   name = "github.com/getlantern/elevate"
   packages = [
@@ -225,11 +217,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:1fa1d94f7e3078d13b2343681908c58af78b8c402045d6e280a5d8e9629db1d1"
+  digest = "1:e1bd5124f74246a43532df9469dec62e6d7a9e6977188495ca71daf0a4473977"
   name = "github.com/getlantern/enhttp"
   packages = ["."]
   pruneopts = "UT"
-  revision = "06cfcf06160d10ec1cc9d1b92452dd4d17cb684a"
+  revision = "a974fa851e3c18be5d0bb6f06d09656365731832"
 
 [[projects]]
   branch = "master"
@@ -265,10 +257,11 @@
 
 [[projects]]
   branch = "devel"
-  digest = "1:017e00c9b620cbeb5c65d9210eeb330c39a22a8e1f3a08387a25524ae1563f3c"
+  digest = "1:cb2e3e506820d32310818080d1c586d968ff55b86b860c4f4134ecc71d84e24d"
   name = "github.com/getlantern/flashlight"
   packages = [
     "balancer",
+    "bandwidth",
     "buffers",
     "chained",
     "chained/config",
@@ -284,7 +277,7 @@
     "status",
   ]
   pruneopts = "UT"
-  revision = "a194e6cacf810b84ce52509a64a6ab090faa5838"
+  revision = "0fab25294467eff2523779e122e9a2e00bad1492"
 
 [[projects]]
   branch = "master"
@@ -548,6 +541,14 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:d73e45b16879bf77e665465acc2389f5451c29803bfe78be334bf9305a0a1760"
+  name = "github.com/getlantern/tinywss"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "72f4ddc309252beeb29b14920390be4a360c998b"
+
+[[projects]]
+  branch = "master"
   digest = "1:e96429ca248e739958c025b2db4b13309e1f501a9a4758441be919c88002a7e6"
   name = "github.com/getlantern/tlsdialer"
   packages = ["."]
@@ -555,20 +556,12 @@
   revision = "cd99cbfe8504186bbe6b40889f8c7d8d218c0f71"
 
 [[projects]]
-  branch = "master"
-  digest = "1:02df7b0ecddcbe1b2a6dc81954d10b5a5e6e55f2a5158b3460085b12db8b6785"
-  name = "github.com/getlantern/urlcache"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "82187dd97f50f0ae304317ef18f36d67f81f5a83"
-
-[[projects]]
-  branch = "master"
-  digest = "1:9072181164e616e422cbfbe48ca9ac249a4d76301ca0876c9f56b937cf214a2f"
+  digest = "1:62c97b543fa5601126be5987633aede547324d265d8a66e05d667d900abebba2"
   name = "github.com/getlantern/uuid"
   packages = ["."]
   pruneopts = "UT"
-  revision = "1318e7614b82cd38041b0b0bd3692d71f3901fb8"
+  revision = "5c9436b8c718822fdf6644ed2a10f71ff7261c8e"
+  version = "v1.2.0"
 
 [[projects]]
   branch = "master"
@@ -577,14 +570,6 @@
   packages = ["."]
   pruneopts = "UT"
   revision = "e99945fbd2d236833907d9539e79b7a8ea604b04"
-
-[[projects]]
-  branch = "master"
-  digest = "1:4186d465d105402dc4165c89bd7102188e2e658ee823d73da5415954e697166f"
-  name = "github.com/getlantern/withtimeout"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "511f017cd91361be75ad73fee96e466a5d790312"
 
 [[projects]]
   branch = "master"
@@ -743,14 +728,6 @@
   pruneopts = "UT"
   revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
   version = "v0.8.0"
-
-[[projects]]
-  branch = "master"
-  digest = "1:0c8c777abf111a0cc92174ad2a259f3adc904997acbaf7f0eb13286eb539fdfd"
-  name = "github.com/pmezard/adblock"
-  packages = ["adblock"]
-  pruneopts = "UT"
-  revision = "edfb97ad89cd57ae8675175539a55aceaf2a05d3"
 
 [[projects]]
   digest = "1:0028cb19b2e4c3112225cd871870f2d9cf49b9b4276531f03438a88e94be86fe"
