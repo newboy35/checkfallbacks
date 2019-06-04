@@ -46,6 +46,46 @@
   revision = "5312a61534124124185d41f09206b9fef1d88403"
 
 [[projects]]
+  digest = "1:cd31033433953d844f76097e9e47c27abefb8674965277d121cdf1c114db8a77"
+  name = "github.com/anacrolix/go-libutp"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "518d4f5f9fe7fdc66d64e14d45d276130fc41862"
+  version = "v1.0.2"
+
+[[projects]]
+  digest = "1:3447219f77f1eb64700a3834b1ef04d99568a31bb97ab6f44ca3f162f3b54d7e"
+  name = "github.com/anacrolix/missinggo"
+  packages = [
+    ".",
+    "expect",
+    "inproc",
+    "perf",
+  ]
+  pruneopts = "UT"
+  revision = "06ffe87aef2930c1cbf3a82ce897a5068063c854"
+  version = "v2.1.0"
+
+[[projects]]
+  digest = "1:4fddfde9c720c471cbe3461e042123057f17330902a5c0d81357f2504ba3492a"
+  name = "github.com/anacrolix/mmsg"
+  packages = [
+    ".",
+    "socket",
+  ]
+  pruneopts = "UT"
+  revision = "e49ae86000d76e6978b573bfaa4e9296713e2fd4"
+  version = "v1.0.0"
+
+[[projects]]
+  branch = "master"
+  digest = "1:3adb53977686df2c767d57feaba122fa813df4b7d7a8a79c0bfcb47222e57ffc"
+  name = "github.com/anacrolix/sync"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "44578de4e778a60bb7a9c15ab60b3f0b0311a53a"
+
+[[projects]]
   branch = "master"
   digest = "1:7d191fd0c54ff370eaf6116a14dafe2a328df487baea280699f597aae858d00d"
   name = "github.com/aristanetworks/goarista"
@@ -174,11 +214,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:dc73ecd1a79968da3c6ba4ff60044fbf99373b0ab79585f925f39c3a2dc63ef1"
+  digest = "1:485c83288c888a8b58cb80e8be92122969467cba665d6c58b549432acfaacd52"
   name = "github.com/getlantern/cmux"
   packages = ["."]
   pruneopts = "UT"
-  revision = "acf511a0dc7c6fe2d7684328fb564605d6f16cba"
+  revision = "e647fe9f0842cc4c0b51eae5d52f322cbcfc3a2c"
 
 [[projects]]
   branch = "master"
@@ -257,7 +297,7 @@
 
 [[projects]]
   branch = "devel"
-  digest = "1:cb2e3e506820d32310818080d1c586d968ff55b86b860c4f4134ecc71d84e24d"
+  digest = "1:1fa988e4d887c7442bcab6b610c5785347ed0eb7db4f31a71ed63e6bbbc393e7"
   name = "github.com/getlantern/flashlight"
   packages = [
     "balancer",
@@ -277,7 +317,7 @@
     "status",
   ]
   pruneopts = "UT"
-  revision = "0fab25294467eff2523779e122e9a2e00bad1492"
+  revision = "522cef4c7976b4d34c6a560f71e69f47a75304cb"
 
 [[projects]]
   branch = "master"
@@ -644,6 +684,14 @@
   ]
   pruneopts = "UT"
   revision = "20f1fb78b0740ba8c3cb143a61e86ba5c8669768"
+
+[[projects]]
+  digest = "1:f9a5e090336881be43cfc1cf468330c1bdd60abdc9dd194e0b1ab69f4b94dd7c"
+  name = "github.com/huandu/xstrings"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "f02667b379e2fb5916c3cda2cf31e0eb885d79f8"
+  version = "v1.2.0"
 
 [[projects]]
   branch = "master"

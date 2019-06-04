@@ -210,15 +210,9 @@ func testFallbackServer(fb *chained.ChainedServerInfo, workerID int) (output *fu
 	if fb.Cert != "" {
 		proto = "https"
 	}
-	switch fb.PluggableTransport {
-	case "obfs4":
-		proto = "obfs4"
-	case "lampshade":
-		proto = "lampshade"
-	case "quic":
-		proto = "quic"
-	case "wss":
-		proto = "wss"
+
+	if fb.PluggableTransport != "" {
+		proto = fb.PluggableTransport
 	}
 	if fb.KCPSettings != nil && len(fb.KCPSettings) > 0 {
 		proto = "kcp"
