@@ -121,6 +121,12 @@ func initFronted() {
 	}
 
 	fronted.Configure(pool, cfg.Client.FrontedProviders(), "cloudfront", "masquerade_cache")
+	cwd, err := os.Getwd()
+	if err == nil {
+		chained.ConfigureFronting(pool, cfg.Client.FrontedProviders(), cwd)
+	} else {
+		log.Errorf("Unable to determing working directory: %s", err)
+	}
 }
 
 // Load the fallback servers list file. Failure to do so will result in
