@@ -15,7 +15,10 @@ replace github.com/anacrolix/go-libutp => github.com/getlantern/go-libutp v1.0.3
 require (
 	github.com/getlantern/flashlight v0.0.0-20190607175337-c59641de7f5c
 	github.com/getlantern/fronted v0.0.0-20190606212108-e7744195eded
-	github.com/getlantern/golog v0.0.0-20170508214112-cca714f7feb5
 	github.com/getlantern/keyman v0.0.0-20180207174507-f55e7280e93a
 	github.com/getlantern/yaml v0.0.0-20160317154340-79303eb9c0d9
+	github.com/siddontang/go v0.0.0-20180604090527-bdc77568d726 // indirect
+	go.uber.org/atomic v1.4.0 // indirect
+	go.uber.org/multierr v1.1.0 // indirect
+	go.uber.org/zap v1.10.0
 )

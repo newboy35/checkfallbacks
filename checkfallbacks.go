@@ -16,7 +16,6 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"os"
-	"runtime"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -27,9 +26,10 @@ import (
 	"github.com/getlantern/flashlight/common"
 	"github.com/getlantern/flashlight/config"
 	"github.com/getlantern/fronted"
-	"github.com/getlantern/golog"
 	"github.com/getlantern/keyman"
 	"github.com/getlantern/yaml"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 const (
@@ -50,11 +50,10 @@ var (
 	timeout       = flag.Duration("timeout", 30*time.Second, "Time out checks after this time amount of time")
 )
 
-var (
-	log = golog.LoggerFor("checkfallbacks")
-)
+var log = newLogger()
 
 func main() {
+	defer log.Sync()
 	flag.Parse()
 
 	if *help {
@@ -62,23 +61,20 @@ func main() {
 		os.Exit(1)
 	}
 
-	numcores := runtime.NumCPU()
-	runtime.GOMAXPROCS(numcores)
-	log.Debugf("Using all %d cores on machine", numcores)
-
+	log.Info("Running checkfallbacks")
 	initFronted()
 	fallbacks := loadFallbacks(*fallbacksFile)
 	outputCh := testAllFallbacks(fallbacks)
 	for out := range outputCh {
 		// Scripts in lanter_aws repo expect the output formats below.
 		if out.err != nil {
-			fmt.Printf("[failed fallback check] %v\n", out.err)
+			log.Errorf("[failed fallback check] %v\n", out.err)
 		} else {
-			fmt.Printf("Fallback %s OK.\n", out.addr)
+			log.Infof("Fallback %s OK.\n", out.addr)
 		}
 		if *verbose && len(out.info) > 0 {
 			for _, msg := range out.info {
-				fmt.Printf("[output] %v\n", msg)
+				log.Infof("[output] %v\n", msg)
 			}
 		}
 	}
@@ -186,7 +182,7 @@ func testAllFallbacks(fallbacks [][]chained.ChainedServerInfo) (output chan *ful
 	go func() {
 		workersWg := sync.WaitGroup{}
 
-		log.Debugf("Spawning %d workers\n", *numConns)
+		log.Infof("Spawning %d workers\n", *numConns)
 
 		workersWg.Add(*numConns)
 		for i := 0; i < *numConns; i++ {
@@ -348,4 +344,32 @@ func doTest(fb *chained.ChainedServerInfo, c *http.Client, workerID int, output 
 	case <-time.After(*timeout):
 		output.err = fmt.Errorf("%v: check timed out", fb.Addr)
 	}
+}
+
+func newLogger() *zap.SugaredLogger {
+	dir := "checkfallback-logs"
+	os.Mkdir(dir, os.ModePerm)
+
+	t := time.Now()
+	filename := fmt.Sprintf("checkfallbacks-%v-%v-%v",
+		t.Year(), int(t.Month()), t.Day())
+	name := dir + "/" + filename + ".json"
+
+	f, err := os.OpenFile(name, os.O_CREATE|os.O_RDWR|os.O_APPEND, 0660)
+	if err != nil {
+		fmt.Printf("Could not open file %v", err)
+		os.Exit(1)
+	}
+
+	enc := zap.NewProductionEncoderConfig()
+	fileEncoder := zapcore.NewJSONEncoder(enc)
+
+	core := zapcore.NewTee(
+		zapcore.NewCore(fileEncoder, zapcore.AddSync(f), zap.DebugLevel),
+		zapcore.NewCore(zapcore.NewConsoleEncoder(enc), zapcore.AddSync(os.Stdout), zap.DebugLevel),
+	)
+
+	log := zap.New(core)
+
+	return log.Sugar()
 }
