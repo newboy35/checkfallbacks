@@ -33,7 +33,7 @@ import (
 )
 
 const (
-	// This is a special device ID that prevents checkfallbacks from being
+	// DeviceID is a special device ID that prevents checkfallbacks from being
 	// throttled. Regular device IDs are Base64 encoded. Since Base64 encoding
 	// doesn't use tildes, no regular device ID will ever match this special
 	// string.
