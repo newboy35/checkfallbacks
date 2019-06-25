@@ -347,7 +347,7 @@ func doTest(fb *chained.ChainedServerInfo, c *http.Client, workerID int, output 
 }
 
 func newLogger() *zap.SugaredLogger {
-	dir := "checkfallback-logs"
+	dir := "checkfallbacks-logs"
 	os.Mkdir(dir, os.ModePerm)
 
 	t := time.Now()
