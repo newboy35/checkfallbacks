@@ -53,6 +53,7 @@ var (
 var log = newLogger()
 
 func main() {
+	start := time.Now()
 	defer log.Sync()
 	flag.Parse()
 
@@ -65,19 +66,21 @@ func main() {
 	initFronted()
 	fallbacks := loadFallbacks(*fallbacksFile)
 	outputCh := testAllFallbacks(fallbacks)
+	log.Info("Finished testing fallbacks")
 	for out := range outputCh {
 		// Scripts in lanter_aws repo expect the output formats below.
 		if out.err != nil {
-			log.Errorf("[failed fallback check] %v\n", out.err)
+			fmt.Printf("[failed fallback check] %v\n", out.err)
 		} else {
-			log.Infof("Fallback %s OK.\n", out.addr)
+			fmt.Printf("Fallback %s OK.\n", out.addr)
 		}
 		if *verbose && len(out.info) > 0 {
 			for _, msg := range out.info {
-				log.Infof("[output] %v\n", msg)
+				fmt.Printf("[output] %v\n", msg)
 			}
 		}
 	}
+	log.Infof("checkfallbacks completed in %v seconds", time.Since(start).Seconds())
 }
 
 func initFronted() {
@@ -178,6 +181,8 @@ func testAllFallbacks(fallbacks [][]chained.ChainedServerInfo) (output chan *ful
 
 	testedCount := int64(0)
 
+	workerCount := int64(0)
+
 	// Spawn goroutines and wait for them to finish
 	go func() {
 		workersWg := sync.WaitGroup{}
@@ -193,12 +198,18 @@ func testAllFallbacks(fallbacks [][]chained.ChainedServerInfo) (output chan *ful
 					output <- testFallbackServer(&fb, i)
 					log.Debugf("Tested %d / %d", atomic.AddInt64(&testedCount, 1), numFallbacks)
 				}
+
 				workersWg.Done()
+				log.Debug("Workers finished: ", atomic.AddInt64(&workerCount, 1))
 			}(i + 1)
 		}
+
+		log.Debug("Waiting for workers to finish")
 		workersWg.Wait()
 
+		log.Debug("Closing output")
 		close(output)
+		log.Debug("Closed output")
 	}()
 
 	return
