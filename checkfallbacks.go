@@ -31,6 +31,8 @@ import (
 	"github.com/getlantern/yaml"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+
+	lumberjack "gopkg.in/natefinch/lumberjack.v2"
 )
 
 const (
@@ -352,27 +354,29 @@ func doTest(fb *chained.ChainedServerInfo, c *http.Client, workerID int, output 
 	}
 }
 
+type lumberjackSink struct {
+	*lumberjack.Logger
+}
+
+// Sync implements zap.Sink. The remaining methods are implemented
+// by the embedded *lumberjack.Logger.
+func (lumberjackSink) Sync() error { return nil }
+
 func newLogger() *zap.SugaredLogger {
 	dir := logDir()
 	os.Mkdir(dir, os.ModePerm)
-
-	t := time.Now()
-	filename := fmt.Sprintf("checkfallbacks-%v-%v-%v",
-		t.Year(), int(t.Month()), t.Day())
-	name := dir + "/" + filename + ".json"
-
-	f, err := os.OpenFile(name, os.O_CREATE|os.O_RDWR|os.O_APPEND, 0660)
-	if err != nil {
-		fmt.Printf("Could not open file %v", err)
-		os.Exit(1)
-	}
-
 	enc := zap.NewProductionEncoderConfig()
 	enc.EncodeTime = zapcore.ISO8601TimeEncoder
 	fileEncoder := zapcore.NewJSONEncoder(enc)
+	w := zapcore.AddSync(&lumberjack.Logger{
+		Filename:   dir + "checkfallbacks.log",
+		MaxSize:    500, // megabytes
+		MaxBackups: 3,
+		MaxAge:     28, // days
+	})
 
 	core := zapcore.NewTee(
-		zapcore.NewCore(fileEncoder, zapcore.AddSync(f), zap.DebugLevel),
+		zapcore.NewCore(fileEncoder, w, zap.DebugLevel),
 		zapcore.NewCore(zapcore.NewConsoleEncoder(enc), zapcore.AddSync(os.Stdout), zap.DebugLevel),
 	)
 
@@ -383,7 +387,7 @@ func newLogger() *zap.SugaredLogger {
 
 func logDir() string {
 	if runtime.GOOS == "linux" {
-		return "/var/log/checkfallbacks"
+		return "/var/log/checkfallbacks/"
 	}
-	return "checkfallbacks-logs"
+	return "checkfallbacks-logs/"
 }
