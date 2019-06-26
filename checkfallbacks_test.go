@@ -8,6 +8,8 @@ import (
 )
 
 func TestJSONloading(t *testing.T) {
+	logger := newLogger()
+	logger.Debug("Running test")
 	fallbacks := loadFallbacks("test.json")
 
 	expectedFb := [][]chained.ChainedServerInfo{

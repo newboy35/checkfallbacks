@@ -16,6 +16,7 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"os"
+	"runtime"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -181,8 +182,6 @@ func testAllFallbacks(fallbacks [][]chained.ChainedServerInfo) (output chan *ful
 
 	testedCount := int64(0)
 
-	workerCount := int64(0)
-
 	// Spawn goroutines and wait for them to finish
 	go func() {
 		workersWg := sync.WaitGroup{}
@@ -200,16 +199,12 @@ func testAllFallbacks(fallbacks [][]chained.ChainedServerInfo) (output chan *ful
 				}
 
 				workersWg.Done()
-				log.Debug("Workers finished: ", atomic.AddInt64(&workerCount, 1))
 			}(i + 1)
 		}
 
-		log.Debug("Waiting for workers to finish")
 		workersWg.Wait()
 
-		log.Debug("Closing output")
 		close(output)
-		log.Debug("Closed output")
 	}()
 
 	return
@@ -358,7 +353,7 @@ func doTest(fb *chained.ChainedServerInfo, c *http.Client, workerID int, output 
 }
 
 func newLogger() *zap.SugaredLogger {
-	dir := "checkfallbacks-logs"
+	dir := logDir()
 	os.Mkdir(dir, os.ModePerm)
 
 	t := time.Now()
@@ -373,6 +368,7 @@ func newLogger() *zap.SugaredLogger {
 	}
 
 	enc := zap.NewProductionEncoderConfig()
+	enc.EncodeTime = zapcore.ISO8601TimeEncoder
 	fileEncoder := zapcore.NewJSONEncoder(enc)
 
 	core := zapcore.NewTee(
@@ -383,4 +379,11 @@ func newLogger() *zap.SugaredLogger {
 	log := zap.New(core)
 
 	return log.Sugar()
+}
+
+func logDir() string {
+	if runtime.GOOS == "linux" {
+		return "/var/log/checkfallbacks"
+	}
+	return "checkfallbacks-logs"
 }
