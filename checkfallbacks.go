@@ -354,14 +354,6 @@ func doTest(fb *chained.ChainedServerInfo, c *http.Client, workerID int, output 
 	}
 }
 
-type lumberjackSink struct {
-	*lumberjack.Logger
-}
-
-// Sync implements zap.Sink. The remaining methods are implemented
-// by the embedded *lumberjack.Logger.
-func (lumberjackSink) Sync() error { return nil }
-
 func newLogger() *zap.SugaredLogger {
 	dir := logDir()
 	os.Mkdir(dir, os.ModePerm)
