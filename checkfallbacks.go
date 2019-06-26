@@ -355,13 +355,11 @@ func doTest(fb *chained.ChainedServerInfo, c *http.Client, workerID int, output 
 }
 
 func newLogger() *zap.SugaredLogger {
-	dir := logDir()
-	os.Mkdir(dir, os.ModePerm)
 	enc := zap.NewProductionEncoderConfig()
 	enc.EncodeTime = zapcore.ISO8601TimeEncoder
 	fileEncoder := zapcore.NewJSONEncoder(enc)
 	w := zapcore.AddSync(&lumberjack.Logger{
-		Filename:   dir + "checkfallbacks.log",
+		Filename:   logFile(),
 		MaxSize:    500, // megabytes
 		MaxBackups: 3,
 		MaxAge:     28, // days
@@ -377,9 +375,9 @@ func newLogger() *zap.SugaredLogger {
 	return log.Sugar()
 }
 
-func logDir() string {
+func logFile() string {
 	if runtime.GOOS == "linux" {
-		return "/var/log/checkfallbacks/"
+		return "/var/log/checkfallbacks/checkfallbacks.log"
 	}
-	return "checkfallbacks-logs/"
+	return "checkfallbacks-logs/checkfallbacks.log"
 }
