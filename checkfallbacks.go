@@ -27,13 +27,16 @@ import (
 	"github.com/getlantern/flashlight/common"
 	"github.com/getlantern/flashlight/config"
 	"github.com/getlantern/fronted"
-	"github.com/getlantern/golog"
 	"github.com/getlantern/keyman"
 	"github.com/getlantern/yaml"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
+
+	lumberjack "gopkg.in/natefinch/lumberjack.v2"
 )
 
 const (
-	// This is a special device ID that prevents checkfallbacks from being
+	// DeviceID is a special device ID that prevents checkfallbacks from being
 	// throttled. Regular device IDs are Base64 encoded. Since Base64 encoding
 	// doesn't use tildes, no regular device ID will ever match this special
 	// string.
@@ -50,11 +53,11 @@ var (
 	timeout       = flag.Duration("timeout", 30*time.Second, "Time out checks after this time amount of time")
 )
 
-var (
-	log = golog.LoggerFor("checkfallbacks")
-)
+var log = newLogger()
 
 func main() {
+	start := time.Now()
+	defer log.Sync()
 	flag.Parse()
 
 	if *help {
@@ -62,13 +65,11 @@ func main() {
 		os.Exit(1)
 	}
 
-	numcores := runtime.NumCPU()
-	runtime.GOMAXPROCS(numcores)
-	log.Debugf("Using all %d cores on machine", numcores)
-
+	log.Info("Running checkfallbacks")
 	initFronted()
 	fallbacks := loadFallbacks(*fallbacksFile)
 	outputCh := testAllFallbacks(fallbacks)
+	log.Info("Finished testing fallbacks")
 	for out := range outputCh {
 		// Scripts in lanter_aws repo expect the output formats below.
 		if out.err != nil {
@@ -82,6 +83,7 @@ func main() {
 			}
 		}
 	}
+	log.Infof("checkfallbacks completed in %v seconds", time.Since(start).Seconds())
 }
 
 func initFronted() {
@@ -186,7 +188,7 @@ func testAllFallbacks(fallbacks [][]chained.ChainedServerInfo) (output chan *ful
 	go func() {
 		workersWg := sync.WaitGroup{}
 
-		log.Debugf("Spawning %d workers\n", *numConns)
+		log.Infof("Spawning %d workers\n", *numConns)
 
 		workersWg.Add(*numConns)
 		for i := 0; i < *numConns; i++ {
@@ -197,9 +199,11 @@ func testAllFallbacks(fallbacks [][]chained.ChainedServerInfo) (output chan *ful
 					output <- testFallbackServer(&fb, i)
 					log.Debugf("Tested %d / %d", atomic.AddInt64(&testedCount, 1), numFallbacks)
 				}
+
 				workersWg.Done()
 			}(i + 1)
 		}
+
 		workersWg.Wait()
 
 		close(output)
@@ -348,4 +352,32 @@ func doTest(fb *chained.ChainedServerInfo, c *http.Client, workerID int, output 
 	case <-time.After(*timeout):
 		output.err = fmt.Errorf("%v: check timed out", fb.Addr)
 	}
+}
+
+func newLogger() *zap.SugaredLogger {
+	enc := zap.NewProductionEncoderConfig()
+	enc.EncodeTime = zapcore.ISO8601TimeEncoder
+	fileEncoder := zapcore.NewJSONEncoder(enc)
+	w := zapcore.AddSync(&lumberjack.Logger{
+		Filename:   logFile(),
+		MaxSize:    500, // megabytes
+		MaxBackups: 3,
+		MaxAge:     28, // days
+	})
+
+	core := zapcore.NewTee(
+		zapcore.NewCore(fileEncoder, w, zap.DebugLevel),
+		zapcore.NewCore(zapcore.NewConsoleEncoder(enc), zapcore.AddSync(os.Stdout), zap.DebugLevel),
+	)
+
+	log := zap.New(core)
+
+	return log.Sugar()
+}
+
+func logFile() string {
+	if runtime.GOOS == "linux" {
+		return "/var/log/checkfallbacks/checkfallbacks.log"
+	}
+	return "checkfallbacks-logs/checkfallbacks.log"
 }
