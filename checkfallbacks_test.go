@@ -12,20 +12,16 @@ func TestJSONloading(t *testing.T) {
 	logger.Debug("Running test")
 	fallbacks := loadFallbacks("test.json")
 
-	expectedFb := [][]chained.ChainedServerInfo{
-		[]chained.ChainedServerInfo{
-			chained.ChainedServerInfo{
-				Addr:      "78.62.239.134:443",
-				Cert:      "-----CERTIFICATE-----\n",
-				AuthToken: "a1",
-			},
+	expectedFb := []chained.ChainedServerInfo{
+		chained.ChainedServerInfo{
+			Addr:      "78.62.239.134:443",
+			Cert:      "-----CERTIFICATE-----\n",
+			AuthToken: "a1",
 		},
-		[]chained.ChainedServerInfo{
-			chained.ChainedServerInfo{
-				Addr:      "178.62.239.34:80",
-				Cert:      "-----CERTIFICATE-----\n",
-				AuthToken: "a2",
-			},
+		chained.ChainedServerInfo{
+			Addr:      "178.62.239.34:80",
+			Cert:      "-----CERTIFICATE-----\n",
+			AuthToken: "a2",
 		},
 	}
 
@@ -35,7 +31,7 @@ func TestJSONloading(t *testing.T) {
 
 	for i, f := range fallbacks {
 		if !reflect.DeepEqual(f, expectedFb[i]) {
-			t.Fail()
+			t.Errorf("Got: %+v \n Expected: %+v", f, expectedFb[i])
 		}
 	}
 }

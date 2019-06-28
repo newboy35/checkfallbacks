@@ -17,9 +17,7 @@ import (
 	"net/http/httputil"
 	"os"
 	"runtime"
-	"strings"
 	"sync"
-	"sync/atomic"
 	"time"
 
 	"github.com/getlantern/flashlight/chained"
@@ -44,13 +42,14 @@ const (
 )
 
 var (
-	help          = flag.Bool("help", false, "Get usage help")
-	verbose       = flag.Bool("verbose", false, "Be verbose (useful for manual testing)")
-	fallbacksFile = flag.String("fallbacks", "fallbacks.json", "File containing json array of fallback information")
-	numConns      = flag.Int("connections", 1, "Number of simultaneous connections")
-	verify        = flag.Bool("verify", false, "Set to true to verify upstream connectivity")
-	checks        = flag.Int("checks", 1, "Number of times to check in each connection. Useful to detect blocking after a few packets being exchanged")
-	timeout       = flag.Duration("timeout", 30*time.Second, "Time out checks after this time amount of time")
+	help           = flag.Bool("help", false, "Get usage help")
+	verbose        = flag.Bool("verbose", false, "Be verbose (useful for manual testing)")
+	fallbacksFile  = flag.String("fallbacks", "fallbacks.json", "File containing json array of fallback information")
+	numConns       = flag.Int("connections", 1, "Number of simultaneous connections")
+	verify         = flag.Bool("verify", false, "Set to true to verify upstream connectivity")
+	checks         = flag.Int("checks", 1, "Number of times to check in each connection. Useful to detect blocking after a few packets being exchanged")
+	timeout        = flag.Duration("timeout", 30*time.Second, "Time out checks after this time amount of time, defaults to 30s")
+	overallTimeout = flag.Duration("overall-timeout", 0, "Stop all checks and quit after this time amount of time")
 )
 
 var log = newLogger()
@@ -69,21 +68,36 @@ func main() {
 	initFronted()
 	fallbacks := loadFallbacks(*fallbacksFile)
 	outputCh := testAllFallbacks(fallbacks)
-	log.Info("Finished testing fallbacks")
-	for out := range outputCh {
-		// Scripts in lanter_aws repo expect the output formats below.
-		if out.err != nil {
-			fmt.Printf("[failed fallback check] %v\n", out.err)
-		} else {
-			fmt.Printf("Fallback %s OK.\n", out.addr)
-		}
-		if *verbose && len(out.info) > 0 {
-			for _, msg := range out.info {
-				fmt.Printf("[output] %v\n", msg)
+	var kill <-chan time.Time
+	if *overallTimeout > 0 {
+		kill = time.After(*overallTimeout)
+	}
+	tested := 0
+	for {
+		select {
+		case out := <-outputCh:
+			if out == nil {
+				log.Infof("checkfallbacks completed in %v seconds", time.Since(start).Seconds())
+				return
 			}
+			tested++
+			log.Debugf("Tested %d / %d", tested, len(fallbacks))
+			// Scripts in lanter_aws repo expect the output formats below.
+			if out.err != nil {
+				fmt.Printf("[failed fallback check] %v\n", out.err)
+			} else {
+				fmt.Printf("Fallback %s OK.\n", out.addr)
+			}
+			if *verbose && len(out.info) > 0 {
+				for _, msg := range out.info {
+					fmt.Printf("[output] %v\n", msg)
+				}
+			}
+		case <-kill:
+			log.Infof("Killing checkfallbacks after running for %v, %d / %d tested", overallTimeout, tested, len(fallbacks))
+			return
 		}
 	}
-	log.Infof("checkfallbacks completed in %v seconds", time.Since(start).Seconds())
 }
 
 func initFronted() {
@@ -133,7 +147,7 @@ func initFronted() {
 
 // Load the fallback servers list file. Failure to do so will result in
 // exiting the program.
-func loadFallbacks(filename string) (fallbacks [][]chained.ChainedServerInfo) {
+func loadFallbacks(filename string) (fallbacks []chained.ChainedServerInfo) {
 	if filename == "" {
 		log.Error("Please specify a fallbacks file")
 		flag.Usage()
@@ -145,15 +159,15 @@ func loadFallbacks(filename string) (fallbacks [][]chained.ChainedServerInfo) {
 		log.Fatalf("Unable to read fallbacks file at %s: %s", filename, err)
 	}
 
-	err = json.Unmarshal(fileBytes, &fallbacks)
+	var lists [][]chained.ChainedServerInfo
+	err = json.Unmarshal(fileBytes, &lists)
 	if err != nil {
 		log.Fatalf("Unable to unmarshal json from %v: %v", filename, err)
 	}
 
-	// Replace newlines in cert with newline literals
-	for _, fbs := range fallbacks {
+	for _, fbs := range lists {
 		for _, fb := range fbs {
-			fb.Cert = strings.Replace(fb.Cert, "\n", "\\n", -1)
+			fallbacks = append(fallbacks, fb)
 		}
 	}
 	return
@@ -166,23 +180,13 @@ type fullOutput struct {
 }
 
 // Test all fallback servers
-func testAllFallbacks(fallbacks [][]chained.ChainedServerInfo) (output chan *fullOutput) {
+func testAllFallbacks(fallbacks []chained.ChainedServerInfo) (output chan *fullOutput) {
 	output = make(chan *fullOutput)
-
-	// Make
-	numFallbacks := 0
-	for _, vals := range fallbacks {
-		numFallbacks += len(vals)
-	}
-	fbChan := make(chan chained.ChainedServerInfo, numFallbacks)
-	for _, vals := range fallbacks {
-		for _, val := range vals {
-			fbChan <- val
-		}
+	fbChan := make(chan chained.ChainedServerInfo, len(fallbacks))
+	for _, fb := range fallbacks {
+		fbChan <- fb
 	}
 	close(fbChan)
-
-	testedCount := int64(0)
 
 	// Spawn goroutines and wait for them to finish
 	go func() {
@@ -197,9 +201,7 @@ func testAllFallbacks(fallbacks [][]chained.ChainedServerInfo) (output chan *ful
 			go func(i int) {
 				for fb := range fbChan {
 					output <- testFallbackServer(&fb, i)
-					log.Debugf("Tested %d / %d", atomic.AddInt64(&testedCount, 1), numFallbacks)
 				}
-
 				workersWg.Done()
 			}(i + 1)
 		}
