@@ -198,12 +198,12 @@ func testAllFallbacks(fallbacks []chained.ChainedServerInfo) (output chan *fullO
 		for i := 0; i < *numConns; i++ {
 			// Worker: consume fallback servers from channel and signal
 			// Done() when closed (i.e. range exits)
-			go func(i int) {
+			go func() {
 				for fb := range fbChan {
-					output <- testFallbackServer(&fb, i)
+					output <- testFallbackServer(&fb)
 				}
 				workersWg.Done()
-			}(i + 1)
+			}()
 		}
 
 		workersWg.Wait()
@@ -215,7 +215,7 @@ func testAllFallbacks(fallbacks []chained.ChainedServerInfo) (output chan *fullO
 }
 
 // Perform the test of an individual server
-func testFallbackServer(fb *chained.ChainedServerInfo, workerID int) (output *fullOutput) {
+func testFallbackServer(fb *chained.ChainedServerInfo) (output *fullOutput) {
 	output = &fullOutput{addr: fb.Addr}
 
 	proto := "http"
@@ -254,23 +254,23 @@ func testFallbackServer(fb *chained.ChainedServerInfo, workerID int) (output *fu
 
 	for i := 0; i < *checks; i++ {
 		if *verify {
-			verifyUpstream(fb, c, workerID, output)
+			verifyUpstream(fb, c, output)
 		} else {
-			ping(fb, c, workerID, output)
+			ping(fb, c, output)
 		}
 	}
 
 	return
 }
 
-func ping(fb *chained.ChainedServerInfo, c *http.Client, workerID int, output *fullOutput) {
+func ping(fb *chained.ChainedServerInfo, c *http.Client, output *fullOutput) {
 	req, err := http.NewRequest("GET", "http://ping-chained-server", nil)
 	if err != nil {
 		output.err = fmt.Errorf("%v: NewRequest to ping failed: %v", fb.Addr, err)
 		return
 	}
 	req.Header.Set(common.PingHeader, "1") // request 1 KB
-	doTest(fb, c, workerID, output, req, func(resp *http.Response, body []byte) error {
+	doTest(fb, c, output, req, func(resp *http.Response, body []byte) error {
 		if resp.StatusCode != 200 {
 			return fmt.Errorf("%v: bad status code: %v", fb.Addr, resp.StatusCode)
 		}
@@ -281,13 +281,13 @@ func ping(fb *chained.ChainedServerInfo, c *http.Client, workerID int, output *f
 	})
 }
 
-func verifyUpstream(fb *chained.ChainedServerInfo, c *http.Client, workerID int, output *fullOutput) {
+func verifyUpstream(fb *chained.ChainedServerInfo, c *http.Client, output *fullOutput) {
 	req, err := http.NewRequest("GET", "http://config.getiantem.org/proxies.yaml.gz", nil)
 	if err != nil {
 		output.err = fmt.Errorf("%v: NewRequest to config.getiantem.org failed: %v", fb.Addr, err)
 		return
 	}
-	doTest(fb, c, workerID, output, req, func(resp *http.Response, body []byte) error {
+	doTest(fb, c, output, req, func(resp *http.Response, body []byte) error {
 		if resp.StatusCode != 200 {
 			return fmt.Errorf("%v: bad status code: %v", fb.Addr, resp.StatusCode)
 		}
@@ -310,7 +310,7 @@ func verifyUpstream(fb *chained.ChainedServerInfo, c *http.Client, workerID int,
 	})
 }
 
-func doTest(fb *chained.ChainedServerInfo, c *http.Client, workerID int, output *fullOutput, req *http.Request, verify func(resp *http.Response, body []byte) error) {
+func doTest(fb *chained.ChainedServerInfo, c *http.Client, output *fullOutput, req *http.Request, verify func(resp *http.Response, body []byte) error) {
 	errCh := make(chan error, 0)
 
 	go func() {
