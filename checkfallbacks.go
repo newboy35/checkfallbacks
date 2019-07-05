@@ -54,6 +54,10 @@ var (
 
 var log = newLogger()
 
+func requiresFronted(fb *chained.ChainedServerInfo) bool {
+	return fb.PluggableTransport == "wss" || fb.ENHTTPURL != ""
+}
+
 func main() {
 	start := time.Now()
 	defer log.Sync()
@@ -65,8 +69,13 @@ func main() {
 	}
 
 	log.Info("Running checkfallbacks")
-	initFronted()
 	fallbacks := loadFallbacks(*fallbacksFile)
+	for _, fb := range fallbacks {
+		if requiresFronted(fb) {
+			initFronted()
+			break
+		}
+	}
 	outputCh := testAllFallbacks(fallbacks)
 	var kill <-chan time.Time
 	if *overallTimeout > 0 {
@@ -147,7 +156,7 @@ func initFronted() {
 
 // Load the fallback servers list file. Failure to do so will result in
 // exiting the program.
-func loadFallbacks(filename string) (fallbacks []chained.ChainedServerInfo) {
+func loadFallbacks(filename string) (fallbacks []*chained.ChainedServerInfo) {
 	if filename == "" {
 		log.Error("Please specify a fallbacks file")
 		flag.Usage()
@@ -159,7 +168,7 @@ func loadFallbacks(filename string) (fallbacks []chained.ChainedServerInfo) {
 		log.Fatalf("Unable to read fallbacks file at %s: %s", filename, err)
 	}
 
-	var lists [][]chained.ChainedServerInfo
+	var lists [][]*chained.ChainedServerInfo
 	err = json.Unmarshal(fileBytes, &lists)
 	if err != nil {
 		log.Fatalf("Unable to unmarshal json from %v: %v", filename, err)
@@ -180,9 +189,9 @@ type fullOutput struct {
 }
 
 // Test all fallback servers
-func testAllFallbacks(fallbacks []chained.ChainedServerInfo) (output chan *fullOutput) {
+func testAllFallbacks(fallbacks []*chained.ChainedServerInfo) (output chan *fullOutput) {
 	output = make(chan *fullOutput)
-	fbChan := make(chan chained.ChainedServerInfo, len(fallbacks))
+	fbChan := make(chan *chained.ChainedServerInfo, len(fallbacks))
 	for _, fb := range fallbacks {
 		fbChan <- fb
 	}
@@ -200,7 +209,7 @@ func testAllFallbacks(fallbacks []chained.ChainedServerInfo) (output chan *fullO
 			// Done() when closed (i.e. range exits)
 			go func() {
 				for fb := range fbChan {
-					output <- testFallbackServer(&fb)
+					output <- testFallbackServer(fb)
 				}
 				workersWg.Done()
 			}()

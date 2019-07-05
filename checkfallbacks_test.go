@@ -12,13 +12,13 @@ func TestJSONloading(t *testing.T) {
 	logger.Debug("Running test")
 	fallbacks := loadFallbacks("test.json")
 
-	expectedFb := []chained.ChainedServerInfo{
-		chained.ChainedServerInfo{
+	expectedFb := []*chained.ChainedServerInfo{
+		&chained.ChainedServerInfo{
 			Addr:      "78.62.239.134:443",
 			Cert:      "-----CERTIFICATE-----\n",
 			AuthToken: "a1",
 		},
-		chained.ChainedServerInfo{
+		&chained.ChainedServerInfo{
 			Addr:      "178.62.239.34:80",
 			Cert:      "-----CERTIFICATE-----\n",
 			AuthToken: "a2",
